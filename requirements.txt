@@ -1,0 +1,6 @@
+librosa
+numpy
+resampy
+soundfile
+torch
+yaml
