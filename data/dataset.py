@@ -3,6 +3,8 @@
 """
 
 import pickle
+import torch
+import numpy
 
 from torch.utils.data import Dataset, DataLoader
 
@@ -12,7 +14,8 @@ class CollateFn(object):
         pass
 
     def __call__(self, batch):
-        pass
+        tensor = torch.from_numpy(numpy.array(batch))
+        return tensor
 
 class AWdataset(Dataset):
     def __init__(self, pickle_path):
@@ -39,7 +42,7 @@ def get_data_loader(dataset, batch_size, shuffle=True, num_workers=4, drop_last=
 
 def infinite_iter(iterable):
     it = iter(iterable)
-    while(True):
+    while True:
         try:
             ret = next(it)
             yield ret
