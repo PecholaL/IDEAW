@@ -21,9 +21,11 @@ class IDEAW(nn.Module):
     def load_config(self, config_path):
         with open(config_path) as f:
             config = yaml.load(f, Loader=yaml.FullLoader)
-            self.n_fft = config['IDEAW']['n_fft']
-            self.hop_len = config['IDEAW']['hop_len']
-    
+            self.n_fft       = config['IDEAW']['n_fft']
+            self.hop_len     = config['IDEAW']['hop_len']
+            self.num_bit     = config['IDEAW']['num_bit']
+            self.num_point   = config['IDEAW']['num_point']
+
 
     def stft(self, data):
         window = torch.hann_window(self.n_fft).to(data.device)
@@ -43,7 +45,7 @@ class IDEAW(nn.Module):
                           window=window, 
                           return_complex=False)
         return ret
-    
+
 
     def embed(self, audio, msg):
         audio_stft = self.stft(audio)
@@ -63,7 +65,7 @@ class IDEAW(nn.Module):
         extr_msg_expand = self.istft(extr_msg_expand_stft)
         extr_msg = self.watermark_fc_back(extr_msg_expand).clamp(-1, 1)
         return extr_msg
-    
+
 
     def enc_dec(self, audio, msg, rev):
         audio = audio.permute(0, 3, 2, 1)

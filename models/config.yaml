@@ -5,6 +5,8 @@ IDEAW:
   n_fft: 2048
   hop_len: 300
   win_len: 1200
+  num_bit: 16
+  num_point: 32
 
 Mihnet:
 
