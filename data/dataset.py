@@ -13,9 +13,11 @@ class CollateFn(object):
     def __init__(self):
         pass
 
+
     def __call__(self, batch):
         tensor = torch.from_numpy(numpy.array(batch))
         return tensor
+
 
 class AWdataset(Dataset):
     def __init__(self, pickle_path):
@@ -29,6 +31,7 @@ class AWdataset(Dataset):
     def __len__(self):
         return len(self.data)
 
+
 def get_data_loader(dataset, batch_size, shuffle=True, num_workers=4, drop_last=False):
     _collate_fn = CollateFn()
     dataLoader = DataLoader(dataset=dataset, 
@@ -39,6 +42,7 @@ def get_data_loader(dataset, batch_size, shuffle=True, num_workers=4, drop_last=
                             pin_memory=True,
                             drop_last=drop_last)
     return dataLoader
+
 
 def infinite_iter(iterable):
     it = iter(iterable)

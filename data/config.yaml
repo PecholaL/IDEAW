@@ -1,7 +1,5 @@
+# Data process configuration
 data_path: '../../Watermark/miniAWdata'         # Modify it!
 out_path: '../../Watermark/miniAWdata_pickle'   # Modify it!
 sample_rate: 16000
-n_fft: 2048
-hop_len: 300
-win_len: 1200
 audio_limit_len: 10                             # unit: second

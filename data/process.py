@@ -25,9 +25,6 @@ if __name__ == "__main__":
     data_path = config['data_path']
     out_path = config['out_path']
     sample_rate = config['sample_rate']
-    n_fft = config['n_fft']
-    hop_len = config['hop_len']
-    win_len = config['win_len']
     audio_limit_len = config['audio_limit_len']
 
     data = [] # save all audio signal

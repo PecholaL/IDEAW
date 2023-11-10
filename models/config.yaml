@@ -1,0 +1,13 @@
+# IDEAW model configuration
+
+## for STFT and ISTFT
+IDEAW:
+  n_fft: 2048
+  hop_len: 300
+  win_len: 1200
+
+Mihnet:
+
+Discriminator:
+
+Restorer:

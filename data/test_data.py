@@ -14,13 +14,10 @@ with open(pickle_path, 'rb') as f:
     print(f'[test]load {len(data)} data items')
 
 # Load data processing configure
-with open('dataConfig.yaml', 'rb') as f:
+with open('dataConfig.yaml') as f:
     config = yaml.load(f, Loader=yaml.FullLoader)
 
 sample_rate = config['sample_rate']
-n_fft = config['n_fft']
-hop_len = config['hop_len']
-win_len = config['win_len']
 
 # Check DataLoader
 dataset = AWdataset(pickle_path=pickle_path)

@@ -1,0 +1,77 @@
+""" IDEAW
+    * Embed & Extract functions
+"""
+
+import torch
+import torch.nn as nn
+import yaml
+
+from mihnet import Mihnet
+
+
+class IDEAW(nn.Module):
+    def __init__(self, config_path):
+        super(IDEAW, self).__init__()
+        self.load_config(config_path)
+        self.hinet = Mihnet(self.num_layers)
+        self.watermark_fc = nn.Linear(self.num_bit, self.num_point)
+        self.watermark_fc_back = nn.Linear(self.num_point, self.num_bit)
+
+
+    def load_config(self, config_path):
+        with open(config_path) as f:
+            config = yaml.load(f, Loader=yaml.FullLoader)
+            self.n_fft = config['IDEAW']['n_fft']
+            self.hop_len = config['IDEAW']['hop_len']
+    
+
+    def stft(self, data):
+        window = torch.hann_window(self.n_fft).to(data.device)
+        ret = torch.stft(input=data, 
+                         n_fft=self.n_fft, 
+                         hop_length=self.hop_len, 
+                         window=window, 
+                         return_complex=False)
+        return ret
+    
+
+    def istft(self, data):
+        window = torch.hann_window(self.n_fft).to(data.device)
+        ret = torch.istft(input=data, 
+                          n_fft=self.n_fft, 
+                          hop_length=self.hop_len, 
+                          window=window, 
+                          return_complex=False)
+        return ret
+    
+
+    def embed(self, audio, msg):
+        audio_stft = self.stft(audio)
+        msg_expand=self.watermark_fc(msg)
+        msg_stft = self.stft(msg_expand)
+
+        wm_audio_stft, _ = self.enc_dec(audio_stft, msg_stft, rev=False)
+        wm_audio = self.istft(wm_audio_stft)
+
+        return wm_audio
+    
+
+    def extract(self, wm_audio):
+        wm_audio_stft = self.stft(wm_audio)
+        aux_signal_stft = wm_audio_stft
+        _, extr_msg_expand_stft = self.enc_dec(wm_audio_stft, aux_signal_stft, rev=True)
+        extr_msg_expand = self.istft(extr_msg_expand_stft)
+        extr_msg = self.watermark_fc_back(extr_msg_expand).clamp(-1, 1)
+        return extr_msg
+    
+
+    def enc_dec(self, audio, msg, rev):
+        audio = audio.permute(0, 3, 2, 1)
+        msg = msg.permute(0, 3, 2, 1)
+
+        audio_, msg_ = self.hinet(audio, msg, rev)
+
+        return audio_, msg_
+
+
+
