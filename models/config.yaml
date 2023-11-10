@@ -1,12 +1,19 @@
 # IDEAW model configuration
 
-## for STFT and ISTFT
 IDEAW:
+  ## for STFT and ISTFT
   n_fft: 2048
   hop_len: 300
   win_len: 1200
+  ## for expanding watermark message
   num_bit: 16
   num_point: 32
+
+## for invertible block
+InnBlock:
+  channel: 2
+  clamp: 2
+  imp: 12
 
 Mihnet:
 
