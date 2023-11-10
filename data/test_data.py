@@ -22,14 +22,6 @@ n_fft = config['n_fft']
 hop_len = config['hop_len']
 win_len = config['win_len']
 
-# Check whether ISTFT can restore the wav
-i = randint(0, len(data))
-stft_test = data[12]
-# print(f'{stft_test.shape}')
-istft_test = istft(stft_test, hop_len, win_len, n_fft)
-write('./tmp/istft_test.wav', sample_rate, istft_test)
-print('ISTFT completed')
-
 # Check DataLoader
 dataset = AWdataset(pickle_path=pickle_path)
 dataLoader = get_data_loader(dataset=dataset, 
@@ -40,5 +32,4 @@ dataLoader = get_data_loader(dataset=dataset,
 train_iter = infinite_iter(dataLoader)
 print(f'[test]built infinite dataloader')
 d = next(train_iter)
-print(f'[test]data shape: {d.shape}')
-
+print(f'[test]data shape: {d.shape}') # [batch, sr * audio_limit_len]

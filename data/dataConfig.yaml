@@ -4,4 +4,4 @@ sample_rate: 16000
 n_fft: 2048
 hop_len: 300
 win_len: 1200
-audio_limit_len: 20                             # unit: second
+audio_limit_len: 10                             # unit: second

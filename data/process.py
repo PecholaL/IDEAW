@@ -30,9 +30,9 @@ if __name__ == "__main__":
     win_len = config['win_len']
     audio_limit_len = config['audio_limit_len']
 
-    data = [] # save all audio STFT
+    data = [] # save all audio signal
 
-    # Read audio data & STFT
+    # Read audio data
     audio_path_list = [] # save absolute paths of audio files 
     for root_path, dirs, files in os.walk(data_path):
         for file in files:
@@ -49,12 +49,7 @@ if __name__ == "__main__":
         audio, _, _ = read_resample(audio_path=audio_path, 
                                    sr=sample_rate, 
                                    audio_limit_len=audio_limit_len)
-        # STFT
-        audio_stft = stft(wav=audio, 
-                          n_fft=n_fft, 
-                          hop_length=hop_len, 
-                          win_length=win_len)
-        data.append(audio_stft)
+        data.append(audio)
 
     # Dump Pickle
     with open(os.path.join(out_path, 'stft.pkl'), 'wb') as f:

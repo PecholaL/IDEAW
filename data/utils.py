@@ -1,6 +1,5 @@
 """ Read audio data from file
     * Func1: Read & Resample
-    * Func2: STFT
 """
 
 import os
@@ -37,21 +36,3 @@ def read_resample(audio_path, sr=16000, audio_limit_len=None):
         data = data[0:sr*audio_limit_len]
     
     return data, sr, audio_len
-
-
-""" STFT
-"""
-def stft(wav, n_fft, hop_length, win_length):
-    return librosa.stft(y=wav, 
-                        n_fft=n_fft, 
-                        hop_length=hop_length, 
-                        win_length=win_length)
-
-
-""" ISTFT
-"""
-def istft(stft_data, hop_length, win_length, n_fft):
-    return librosa.istft(stft_matrix=stft_data, 
-                         hop_length=hop_length, 
-                         win_length=win_length, 
-                         n_fft=n_fft)
