@@ -4,7 +4,7 @@ Robust Neural Audio Watermark with Invertible Dual-Embedding
 ## Training IDEAW
 "**(*)**" means **necessary** steps
 ### Data Processing
-1. **(*)**Modify `./data/config.yaml` based on the specific location of your dataset.
+1. **(*)**Modify *./data/config.yaml* based on the specific location of your dataset.
 2. **(*)**Build Dataset and dump into pickle:
    `python3 ./data/process.py`
 3. Test your built Dataset, DataLoader:
@@ -17,6 +17,7 @@ These networks are defined in different .py files:
 1. *mihnet.py* defines the core multi-INN of IDEAW.
 2. *componentNet.py* defines the discriminator and the restorer.
 3. *attackLayer.py* defines the attack simulate layer.
+
 The components of MIHNET, i.e. INN block is defined in *inn.py*.
 Then, in *ideaw.py*, these components are assembled. The IDEAW in *ideaw.py* also provides STFT/ISTFT/Embed/Extract operations.
 Finally, solver.py provides the optimizer of IDEAW.
