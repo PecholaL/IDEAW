@@ -1,6 +1,9 @@
-from .ideaw import IDEAW
-from .dense import DenseBlock
-from .inn import InnBlock
-from .mihnet import Mihnet
-from .componentNet import Discriminator, Restorer
-from .attackLayer import AttackLayer
+from . import attackLayer, componentNet, dense, ideaw, inn, mihnet
+
+
+# from .ideaw import IDEAW
+# from .dense import DenseBlock
+# from .inn import InnBlock
+# from .mihnet import Mihnet_s1, Mihnet_s2
+# from .componentNet import Discriminator, Restorer
+# from .attackLayer import AttackLayer

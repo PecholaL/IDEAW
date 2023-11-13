@@ -13,7 +13,6 @@ IDEAW:
 InnBlock:
   channel: 2
   clamp: 2
-  imp: 12
 
 Mihnet:
 

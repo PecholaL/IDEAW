@@ -2,7 +2,6 @@
     configuration is at IDEAW/models/config.yaml
 """
 
-import torch
 import torch.nn as nn
 import yaml
 
@@ -12,22 +11,15 @@ from inn import InnBlock
 class Mihnet_s1(nn.Module):
     def __init__(self, config_path):
         super(Mihnet_s1, self).__init__()
-        self.load_config(config_path)
-        self.inv1 = InnBlock()
-        self.inv2 = InnBlock()
-        self.inv3 = InnBlock()
-        self.inv4 = InnBlock()
+        self.inv1 = InnBlock(config_path)
+        self.inv2 = InnBlock(config_path)
+        self.inv3 = InnBlock(config_path)
+        self.inv4 = InnBlock(config_path)
 
-        self.inv5 = InnBlock()
-        self.inv6 = InnBlock()
-        self.inv7 = InnBlock()
-        self.inv8 = InnBlock()
-
-
-    def load_config(self, config_path):
-        with open(config_path) as f:
-            config = yaml.load(f, Loader=yaml.FullLoader)
-
+        self.inv5 = InnBlock(config_path)
+        self.inv6 = InnBlock(config_path)
+        self.inv7 = InnBlock(config_path)
+        self.inv8 = InnBlock(config_path)
 
     def forward(self, x, rev=False):
         if not rev:
@@ -47,22 +39,15 @@ class Mihnet_s1(nn.Module):
 class Mihnet_s2(nn.Module):
     def __init__(self, config_path):
         super(Mihnet_s2, self).__init__()
-        self.load_config(config_path)
-        self.inv1 = InnBlock()
-        self.inv2 = InnBlock()
-        self.inv3 = InnBlock()
-        self.inv4 = InnBlock()
+        self.inv1 = InnBlock(config_path)
+        self.inv2 = InnBlock(config_path)
+        self.inv3 = InnBlock(config_path)
+        self.inv4 = InnBlock(config_path)
 
-        self.inv5 = InnBlock()
-        self.inv6 = InnBlock()
-        self.inv7 = InnBlock()
-        self.inv8 = InnBlock()
-
-
-    def load_config(self, config_path):
-        with open(config_path) as f:
-            config = yaml.load(f, Loader=yaml.FullLoader)
-
+        self.inv5 = InnBlock(config_path)
+        self.inv6 = InnBlock(config_path)
+        self.inv7 = InnBlock(config_path)
+        self.inv8 = InnBlock(config_path)
 
     def forward(self, x, rev=False):
         if not rev:
@@ -77,4 +62,3 @@ class Mihnet_s2(nn.Module):
             out = self.inv8(out, rev=True)
 
         return out
-

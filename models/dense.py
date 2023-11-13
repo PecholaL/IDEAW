@@ -18,7 +18,6 @@ class DenseBlock(nn.Module):
         # initialization
         # mutil.initialize_weights([self.conv5], 0.)
 
-
     def forward(self, x):
         x1 = self.lrelu(self.conv1(x))
         x2 = self.lrelu(self.conv2(torch.cat((x, x1), 1)))
