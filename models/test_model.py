@@ -30,5 +30,8 @@ print(f"msg shape: {msg.shape}")
 chunk_size = 16000
 chunk = audio[:, 0 : 0 + chunk_size]
 
-chunk_wmd = IDEAW.embed(chunk, msg).detach().cpu().numpy().squeeze()
+chunk_wmd = IDEAW.embed(chunk, msg).detach().cpu()
 print(f"watermarked audio shape: {chunk_wmd.shape}")
+
+extr_msg = IDEAW.extract(chunk_wmd.to("cpu")).int().detach().cpu().numpy()
+print(f"extracted msg shape: {extr_msg.shape}")

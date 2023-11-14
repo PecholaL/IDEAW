@@ -2,10 +2,10 @@
 Robust Neural Audio Watermark with Invertible Dual-Embedding
 
 ## Training IDEAW
-"**(*)**" means **necessary** steps
+"**(\*)**" means **necessary** steps
 ### Data Processing
-1. **(*)**Modify *./data/config.yaml* based on the specific location of your dataset.
-2. **(*)**Build Dataset and dump into pickle:
+1. **(\*)**Modify *./data/config.yaml* based on the specific location of your dataset.
+2. **(\*)**Build Dataset and dump into pickle:
    `python3 ./data/process.py`
 3. Test your built Dataset, DataLoader:
    `python3 ./data/test_data.py`
@@ -24,7 +24,7 @@ Finally, solver.py provides the optimizer of IDEAW.
 Note that all the configurations of the model are located in *./models/config.yaml*.
 
 ### Training
-**(*)** `./train.sh`
+**(\*)** `./train.sh`
 
 ### Embedding and Extraction
 *embed_extract.py* provides the embedding and extracting processes of audio watermark via the traned **IDEAW**.
