@@ -2,12 +2,12 @@
 
 IDEAW:
   ## for STFT and ISTFT
-  n_fft: 2048
-  hop_len: 300
-  win_len: 1200
+  n_fft: 1000
+  hop_len: 250
+  win_len: 1000
   ## for expanding watermark message
   num_bit: 16
-  num_point: 32
+  num_point: 16000
 
 ## for invertible block
 InnBlock:

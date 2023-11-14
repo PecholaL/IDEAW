@@ -2,6 +2,7 @@
 """
 
 import sys
+import torch
 
 sys.path.append("..")
 from ideaw import IDEAW
@@ -14,10 +15,20 @@ loader = get_data_loader(dataset=dataset, batch_size=10, num_workers=0)
 INF_loader = infinite_iter(loader)
 
 data = next(INF_loader)
-print(f"Batch data shape: {data.shape}")
+print(f"batch data shape: {data.shape}")
 
-data_stft = IDEAW.stft(data)
-print(f"stft data shape: {data_stft.shape}")
+# embedding process test
+audio = torch.FloatTensor(data[0].float().unsqueeze(0)).to("cpu")
+print(f"audio shape: {audio.shape}")
+audio_stft = IDEAW.stft(audio)
+print(f"stft audio shape: {audio_stft.shape}")
+msg = [1, 1, 1, 1, -1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1]
+pos_code = [1, 1, 1, 1, 0, 0, 0, 0]
+msg = torch.FloatTensor(torch.tensor(msg).float().unsqueeze(0)).to("cpu")
+print(f"msg shape: {msg.shape}")
 
-data_istft = IDEAW.istft(data_stft)
-print(f"istft data shape: {data_istft.shape}")
+chunk_size = 16000
+chunk = audio[:, 0 : 0 + chunk_size]
+
+chunk_wmd = IDEAW.embed(chunk, msg).detach().cpu().numpy().squeeze()
+print(f"watermarked audio shape: {chunk_wmd.shape}")

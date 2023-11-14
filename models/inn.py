@@ -2,6 +2,7 @@
     * define invertible block InnBlock for Mihnet
 """
 
+import torch
 import torch.nn as nn
 import yaml
 
@@ -27,6 +28,9 @@ class InnBlock(nn.Module):
     def load_config(self, config_path):
         with open(config_path) as f:
             self.config = yaml.load(f, Loader=yaml.FullLoader)
+
+    def e(self, s):
+        return torch.exp(self.clamp * 2 * (torch.sigmoid(s) - 0.5))
 
     def forward(self, x1, x2, rev=False):
         if not rev:
