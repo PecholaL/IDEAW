@@ -1,4 +1,4 @@
-from . import attackLayer, componentNet, dense, ideaw, inn, mihnet
+from . import attackLayer, componentNet, dense, ideaw, innBlock, mihnet
 
 
 # from .ideaw import IDEAW

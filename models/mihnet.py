@@ -3,9 +3,8 @@
 """
 
 import torch.nn as nn
-import yaml
 
-from inn import InnBlock
+from innBlock import InnBlock
 
 
 class Mihnet_s1(nn.Module):
