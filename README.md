@@ -18,7 +18,7 @@ These networks are defined in different .py files:
 2. *componentNet.py* defines the discriminator and the restorer.
 3. *attackLayer.py* defines the attack simulate layer.
 
-The components of MIHNET, i.e. INN block is defined in *inn.py*.
+The components of MIHNET, i.e. INN block is defined in *innBlock.py*.
 Then, in *ideaw.py*, these components are assembled. The IDEAW in *ideaw.py* also provides STFT/ISTFT/Embed/Extract operations.
 Finally, solver.py provides the optimizer of IDEAW.
 Note that all the configurations of the model are located in *./models/config.yaml*.
