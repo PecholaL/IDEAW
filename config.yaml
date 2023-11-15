@@ -1,1 +1,12 @@
-pkl_path: '../Watermark/miniAWdata_pickle'
+# for training (optimizer configuration)
+train:
+  lr1: 1e-5 
+  lr2: 1e-5
+  beta1: 0.5
+  beta2: 0.999
+  eps: 1e-6
+  weight_decay: 1e-5
+  weight_step: 200
+  gamma: 0.98
+  optim1_step: True
+  optim2_step: True

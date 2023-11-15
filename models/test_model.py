@@ -5,7 +5,7 @@ import sys
 import torch
 
 sys.path.append("..")
-from ideaw import IDEAW
+from models.ideaw import IDEAW
 from data.dataset import AWdataset, get_data_loader, infinite_iter
 
 IDEAW = IDEAW("config.yaml")
@@ -35,18 +35,19 @@ print(f"msg&lcode shape: {msg.shape}&{lcode.shape}")
 chunk_size = 16000
 chunk = audio[:, 0 : 0 + chunk_size]  # 1s
 
-chunk_wmd = IDEAW.embed_msg(chunk, msg).detach().cpu()
+chunk_wmd, chunk_wmd_stft = IDEAW.embed_msg(chunk, msg)
+chunk_wmd = chunk_wmd.detach().cpu()
 print(f"watermarked audio shape: {chunk_wmd.shape}")
 
-chunk_wmd_lcd = IDEAW.embed_lcode(chunk_wmd, lcode)
+chunk_wmd_lcd, chunk_wmd_lcd_stft = IDEAW.embed_lcode(chunk_wmd_stft, lcode)
 print(f"lcode embedded audio shape: {chunk_wmd_lcd.shape}")
 
 
 # extracing lcode and msg from chunk_wmd_lcd
-mid, extr_lcode = IDEAW.extract_lcode(chunk_wmd_lcd)
+mid_stft, extr_lcode = IDEAW.extract_lcode(chunk_wmd_lcd_stft)
 extr_lcode = extr_lcode.int().detach()
 print(f"extracted lcode shape: {extr_lcode.shape}")
-print(f"mid signal shape: {mid.shape}")
+print(f"mid signal shape: {mid_stft.shape}")
 
-extr_msg = IDEAW.extract_msg(mid).int().detach().cpu().numpy()
+extr_msg = IDEAW.extract_msg(mid_stft).int().detach().cpu().numpy()
 print(f"extracted msg shape: {extr_msg.shape}")

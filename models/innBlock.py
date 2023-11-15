@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 import yaml
 
-from dense import DenseBlock
+from models.dense import DenseBlock
 
 
 class InnBlock(nn.Module):

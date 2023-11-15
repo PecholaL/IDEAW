@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 import yaml
 
-from mihnet import Mihnet_s1, Mihnet_s2
+from models.mihnet import Mihnet_s1, Mihnet_s2
 
 
 class IDEAW(nn.Module):
@@ -60,7 +60,7 @@ class IDEAW(nn.Module):
         wm_audio_stft, _ = self.enc_dec_1(audio_stft, msg_stft, rev=False)
         wm_audio = self.istft(wm_audio_stft)
 
-        return wm_audio
+        return wm_audio, wm_audio_stft
 
     def extract_msg(self, wm_mid_stft):
         aux_signal_stft = wm_mid_stft
@@ -69,26 +69,24 @@ class IDEAW(nn.Module):
         extr_msg = self.msg_fc_back(extr_msg_expand).clamp(-1, 1)
         return extr_msg
 
-    def enc_dec_1(self, audio, msg, rev):
-        audio = audio.permute(0, 3, 2, 1)  # [B, C, T, F]
-        msg = msg.permute(0, 3, 2, 1)
+    def enc_dec_1(self, audio_stft, msg_stft, rev):
+        audio_stft = audio_stft.permute(0, 3, 2, 1)  # [B, C, T, F]
+        msg_stft = msg_stft.permute(0, 3, 2, 1)
 
-        audio_, msg_ = self.hinet_1(audio, msg, rev)
+        audio_stft_, msg_stft_ = self.hinet_1(audio_stft, msg_stft, rev)
 
-        return audio_.permute(0, 3, 2, 1), msg_.permute(0, 3, 2, 1)
+        return audio_stft_.permute(0, 3, 2, 1), msg_stft_.permute(0, 3, 2, 1)
 
     # INN#2 Embedding & Extracting watermark locating code
-    def embed_lcode(self, audio, lcode):
-        audio_stft = self.stft(audio)
+    def embed_lcode(self, audio_stft, lcode):
         lcode_expand = self.lcode_fc(lcode)
         lcode_stft = self.stft(lcode_expand)
         wm_audio_stft, _ = self.enc_dec_2(audio_stft, lcode_stft, rev=False)
         wm_audio = self.istft(wm_audio_stft)
 
-        return wm_audio
+        return wm_audio, wm_audio_stft
 
-    def extract_lcode(self, wm_audio):
-        wm_audio_stft = self.stft(wm_audio)
+    def extract_lcode(self, wm_audio_stft):
         aux_signal_stft = wm_audio_stft
         mid_stft, extr_lcode_expand_stft = self.enc_dec_2(
             wm_audio_stft, aux_signal_stft, rev=True
@@ -97,10 +95,10 @@ class IDEAW(nn.Module):
         extr_lcode = self.lcode_fc_back(extr_lcode_expand).clamp(-1, 1)
         return mid_stft, extr_lcode
 
-    def enc_dec_2(self, audio, lcode, rev):
-        audio = audio.permute(0, 3, 2, 1)  # [B, C, T, F]
-        lcode = lcode.permute(0, 3, 2, 1)
+    def enc_dec_2(self, audio_stft, lcode_stft, rev):
+        audio_stft = audio_stft.permute(0, 3, 2, 1)  # [B, C, T, F]
+        lcode_stft = lcode_stft.permute(0, 3, 2, 1)
 
-        audio_, lcode_ = self.hinet_1(audio, lcode, rev)
+        audio_stft_, lcode_stft_ = self.hinet_2(audio_stft, lcode_stft, rev)
 
-        return audio_.permute(0, 3, 2, 1), lcode_.permute(0, 3, 2, 1)
+        return audio_stft_.permute(0, 3, 2, 1), lcode_stft_.permute(0, 3, 2, 1)
