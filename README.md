@@ -1,5 +1,5 @@
 # IDEAW
-Robust Neural Audio Watermark with Invertible Dual-Embedding
+Robust Neural Audio Watermarking with Invertible Dual-Embedding
 
 ## Training IDEAW
 "**(\*)**" means **necessary** steps
