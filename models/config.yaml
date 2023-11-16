@@ -15,8 +15,7 @@ InnBlock:
   channel: 2
   clamp: 2
 
-Mihnet:
-
 Discriminator:
+  input_size: 16000
 
 Restorer:

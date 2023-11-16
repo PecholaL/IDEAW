@@ -7,6 +7,7 @@ import torch.nn as nn
 import yaml
 
 from models.mihnet import Mihnet_s1, Mihnet_s2
+from models.componentNet import Discriminator
 
 
 class IDEAW(nn.Module):
@@ -19,6 +20,7 @@ class IDEAW(nn.Module):
         self.msg_fc_back = nn.Linear(self.num_point, self.num_bit)
         self.lcode_fc = nn.Linear(self.num_lc_bit, self.num_point)
         self.lcode_fc_back = nn.Linear(self.num_point, self.num_lc_bit)
+        self.discriminator = Discriminator(config_path)
 
     def load_config(self, config_path):
         with open(config_path) as f:
