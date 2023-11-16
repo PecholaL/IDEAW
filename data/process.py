@@ -1,6 +1,5 @@
 """ Process audio data
     * Read from .mp3, .flac, .wav files
-    * STFT
     * Build Dataset
 """
 
@@ -22,6 +21,7 @@ if __name__ == "__main__":
     out_path = config["out_path"]
     sample_rate = config["sample_rate"]
     audio_limit_len = config["audio_limit_len"]
+    audio_segment_len = config["audio_segment_len"]
 
     data = []  # save all audio signal
 
@@ -40,9 +40,14 @@ if __name__ == "__main__":
             print(f"[Dataset]processed {i} audio files")
         # Read & Resample
         audio, _, _ = read_resample(
-            audio_path=audio_path, sr=sample_rate, audio_limit_len=audio_limit_len
+            audio_path=audio_path, sr=sample_rate, audio_limit_len=None
         )
-        data.append(audio)
+        audio_len = audio_len_second(audio, sample_rate)
+        sample_num = int(audio_len / audio_segment_len)
+        for i in range(sample_num):
+            audio_segment = audio[i * sample_rate : (i + 1) * sample_rate]
+            data.append(audio_segment)
+    print(f"[Dataset]got {len(data)} training samples")
 
     # Dump Pickle
     with open(os.path.join(out_path, "audio.pkl"), "wb") as f:

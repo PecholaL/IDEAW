@@ -1,5 +1,6 @@
 # Data process configuration
-data_path: '/Users/pecholalee/Coding/Watermark/miniAWdata'         # Modify it!
-out_path: '/Users/pecholalee/Coding/Watermark/miniAWdata_pickle'   # Modify it!
+data_path: '/Users/pecholalee/Coding/Watermark/miniAWdata' # Modify it!
+out_path: '/Users/pecholalee/Coding/Watermark/miniAWdata_pickle' # Modify it!
 sample_rate: 16000
-audio_limit_len: 1                             # unit: second
+audio_limit_len: 10 # unit: second
+audio_segment_len: 1 # unit: second
