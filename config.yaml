@@ -1,11 +1,13 @@
 # for training (optimizer configuration)
 train:
-  lr1: 1e-5 
-  lr2: 1e-5
+  batch_size: 1
+  num_workers: 0
+  lr1: 1e-5 # use str
+  lr2: 1e-5 # use str
   beta1: 0.5
   beta2: 0.999
-  eps: 1e-6
-  weight_decay: 1e-5
+  eps: 1e-6 # use str
+  weight_decay: 1e-5 # use str
   weight_step: 200
   gamma: 0.98
   optim1_step: True

@@ -5,5 +5,6 @@ python3 train.py \
 --pickle_path /Users/pecholalee/Coding/Watermark/miniAWdata_pickle/audio.pkl \
 --store_model_path /Users/pecholalee/Coding/Watermark/ideaw_data/save/ \
 --load_model_path /Users/pecholalee/Coding/Watermark/ideaw_data/save/ \
+--summary_steps 2 \
 --save_steps 5 \
 --iterations 10 \

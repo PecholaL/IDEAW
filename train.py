@@ -13,8 +13,11 @@ if __name__ == "__main__":
     parser.add_argument("--model_config", default="./model/config.yaml")
     parser.add_argument("--data_config", default="./data/config.yaml")
     parser.add_argument("--pickle_path")
+    parser.add_argument("--load_model", action="store_true")
+    parser.add_argument("--load_opt", action="store_true")
     parser.add_argument("--store_model_path")
     parser.add_argument("--load_model_path")
+    parser.add_argument("--summary_steps", default=2, type=int)
     parser.add_argument("--save_steps", default=5, type=int)
     parser.add_argument("--iterations", default=5, type=int)
 

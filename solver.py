@@ -26,20 +26,26 @@ class Solver(object):
         self.build_model()  # prepare model
         self.build_optims()  # prepare optimizers
 
-        if args.load_model:
+        if self.args.load_model:
             self.load_model()
 
     # prepare data, called in Solver.init
     def get_inf_train_iter(self):
         dataset_dir = self.args.pickle_path
         self.dataset = AWdataset(dataset_dir)
+        self.batch_size = self.config_t["train"]["batch_size"]
+        self.num_workers = self.config_t["train"]["num_workers"]
         self.train_iter = infinite_iter(
-            get_data_loader(dataset=self.dataset, batch_size=10, num_workers=0)
+            get_data_loader(
+                dataset=self.dataset,
+                batch_size=self.batch_size,
+                num_workers=self.num_workers,
+            )
         )
         print("[IDEAW]infinite dataloader built")
         return
 
-    # load model to cuda, called in Solver.init.buildmode
+    # load model/data to cuda
     def cc(self, net):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         return net.to(device)
@@ -62,12 +68,12 @@ class Solver(object):
         param_hinet2 = list(
             filter(lambda p: p.requires_grad, self.model.hinet_2.parameters())
         )
-        lr1 = self.config_t["train"]["lr1"]
-        lr2 = self.config_t["train"]["lr2"]
-        beta1 = self.config_model["train"]["beta1"]
-        beta2 = self.config_model["train"]["beta2"]
-        eps = self.config_model["train"]["eps"]
-        weight_decay = self.config["train"]["weight_decay"]
+        lr1 = eval(self.config_t["train"]["lr1"])
+        lr2 = eval(self.config_t["train"]["lr2"])
+        beta1 = self.config_t["train"]["beta1"]
+        beta2 = self.config_t["train"]["beta2"]
+        eps = eval(self.config_t["train"]["eps"])
+        weight_decay = eval(self.config_t["train"]["weight_decay"])
         self.optim_inn1 = torch.optim.Adam(
             param_hinet1,
             lr=lr1,
@@ -121,29 +127,41 @@ class Solver(object):
         print("[IDEAW]starting training...")
         for iter in range(n_iterations):
             # get data for current iteration
-            host_audio = next(self.train_iter)
+            host_audio = next(self.train_iter).float()
             msg_len = self.config_model["IDEAW"]["num_bit"]
             lcode_len = self.config_model["IDEAW"]["num_lc_bit"]
-            tmp_tensor = torch.randint(-1, 2, (msg_len,))
-            watermark_msg = tmp_tensor[tmp_tensor == 0] = -1
-            locate_code = torch.randint(0, 2, (lcode_len,))
+            watermark_msg = torch.randint(
+                0, 2, (self.batch_size, msg_len), dtype=torch.float
+            )
+            watermark_msg[watermark_msg == 0] = -1
+            locate_code = torch.randint(
+                0, 2, (self.batch_size, lcode_len), dtype=torch.float
+            )
+            ## load to cuda
+            host_audio = self.cc(host_audio)
+            watermark_msg = self.cc(watermark_msg)
+            locate_code = self.cc(locate_code)
 
             # forward 1
             audio_wmd1, audio_wmd1_stft = self.model.embed_msg(
                 host_audio, watermark_msg
             )
+            print("f1ok")
             ## get msg from 1st embedding
             msg_extr1 = self.model.extract_msg(audio_wmd1_stft)
+            print("e1ok")
 
             # forward 2
             audio_wmd2, audio_wmd2_stft = self.model.embed_lcode(
                 audio_wmd1_stft, locate_code
             )
+            print("f2ok")
             ## get lcode from 2nd embedding
             mid_stft, lcode_extr = self.model.extract_lcode(audio_wmd2_stft)
+            print("e2ok")
             ## get msg after extracting lcode
             msg_extr2 = self.model.extract_msg(mid_stft)
-
+            print("e12ok")
             # loss
             percept_loss_history = []
             integ_loss_history = []
@@ -182,9 +200,12 @@ class Solver(object):
                 end="\r",
             )
 
+            # summary
+            if (iter + 1) % self.args.summary_steps == 0 or iter + 1 == n_iterations:
+                print()
+
             # autosave
             if (iter + 1) % self.args.save_steps == 0 or iter + 1 == n_iterations:
                 self.save_model()
-                print()
 
-            return
+        return
