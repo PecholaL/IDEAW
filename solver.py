@@ -25,6 +25,7 @@ class Solver(object):
         self.get_inf_train_iter()  # prepare data
         self.build_model()  # prepare model
         self.build_optims()  # prepare optimizers
+        self.loss_criterion()  # prepare criterions
 
         if self.args.load_model:
             self.load_model()
@@ -68,8 +69,12 @@ class Solver(object):
         param_hinet2 = list(
             filter(lambda p: p.requires_grad, self.model.hinet_2.parameters())
         )
+        param_discr = list(
+            filter(lambda p: p.requires_grad, self.model.discriminator.parameters())
+        )
         lr1 = eval(self.config_t["train"]["lr1"])
         lr2 = eval(self.config_t["train"]["lr2"])
+        lr3 = eval(self.config_t["train"]["lr3"])
         beta1 = self.config_t["train"]["beta1"]
         beta2 = self.config_t["train"]["beta2"]
         eps = eval(self.config_t["train"]["eps"])
@@ -88,13 +93,25 @@ class Solver(object):
             eps=eps,
             weight_decay=weight_decay,
         )
+        self.optim_com = torch.optim.Adam(
+            param_discr,
+            lr=lr3,
+            betas=(beta1, beta2),
+            eps=eps,
+            weight_decay=weight_decay,
+        )
         self.weight_scheduler1 = torch.optim.lr_scheduler.StepLR(
             self.optim_inn1,
             self.config_t["train"]["weight_step"],
             gamma=self.config_t["train"]["gamma"],
         )
-        self.weight_scheduler1 = torch.optim.lr_scheduler.StepLR(
-            self.optim_inn1,
+        self.weight_scheduler2 = torch.optim.lr_scheduler.StepLR(
+            self.optim_inn2,
+            self.config_t["train"]["weight_step"],
+            gamma=self.config_t["train"]["gamma"],
+        )
+        self.weight_scheduler3 = torch.optim.lr_scheduler.StepLR(
+            self.optim_com,
             self.config_t["train"]["weight_step"],
             gamma=self.config_t["train"]["gamma"],
         )
@@ -109,6 +126,9 @@ class Solver(object):
         torch.save(
             self.optim_inn2.state_dict(), f"{self.args.store_model_path}optim2.opt"
         )
+        torch.save(
+            self.optim_com.state_dict(), f"{self.args.store_model_path}optim3.opt"
+        )
 
     # load trained model
     def load_model(self):
@@ -122,9 +142,18 @@ class Solver(object):
         )
         return
 
+    # loss criterion
+    def loss_criterion(self):
+        self.criterion_percept = nn.MSELoss()
+        self.criterion_integ = nn.MSELoss()
+        self.criterion_discr = nn.BCELoss()
+
     # training
     def train(self, n_iterations):
         print("[IDEAW]starting training...")
+        percept_loss_history = []
+        integ_loss_history = []
+        discr_loss_history = []
         for iter in range(n_iterations):
             # get data for current iteration
             host_audio = next(self.train_iter).float()
@@ -146,7 +175,6 @@ class Solver(object):
             audio_wmd1, audio_wmd1_stft = self.model.embed_msg(
                 host_audio, watermark_msg
             )
-
             ## get msg from 1st embedding
             msg_extr1 = self.model.extract_msg(audio_wmd1_stft)
 
@@ -154,31 +182,37 @@ class Solver(object):
             audio_wmd2, audio_wmd2_stft = self.model.embed_lcode(
                 audio_wmd1_stft, locate_code
             )
-
             ## get lcode from 2nd embedding
             mid_stft, lcode_extr = self.model.extract_lcode(audio_wmd2_stft)
-
             ## get msg after extracting lcode
             msg_extr2 = self.model.extract_msg(mid_stft)
 
+            # discriminate
+            orig_label = self.cc(torch.ones((self.batch_size, 1)))
+            wmd_label = self.cc(torch.zeros((self.batch_size, 1)))
+
+            orig_output = self.model.discriminator(host_audio)
+            wmd_output = self.model.discriminator(audio_wmd2)
+
             # loss
-            percept_loss_history = []
-            integ_loss_history = []
             ## percept. loss
-            criterion_1 = nn.MSELoss()
-            percept_loss_1 = criterion_1(host_audio, audio_wmd1)
-            percept_loss_2 = criterion_1(host_audio, audio_wmd2)
+            percept_loss_1 = self.criterion_percept(host_audio, audio_wmd1)
+            percept_loss_2 = self.criterion_percept(host_audio, audio_wmd2)
             percept_loss = percept_loss_1 + percept_loss_2
             percept_loss_history.append(percept_loss.item())
             ## integrity loss
-            criterion_2 = nn.MSELoss()
-            integ_loss_1 = criterion_2(watermark_msg, msg_extr1)
-            integ_loss_2 = criterion_2(watermark_msg, msg_extr2)
-            integ_loss_3 = criterion_2(locate_code, lcode_extr)
+            integ_loss_1 = self.criterion_integ(watermark_msg, msg_extr1)
+            integ_loss_2 = self.criterion_integ(watermark_msg, msg_extr2)
+            integ_loss_3 = self.criterion_integ(locate_code, lcode_extr)
             integ_loss = integ_loss_1 + integ_loss_2 + integ_loss_3
             integ_loss_history.append(integ_loss.item())
+            ## discriminate loss
+            discr_loss_orig = self.criterion_discr(orig_output, orig_label)
+            discr_loss_wmd = self.criterion_discr(wmd_output, wmd_label)
+            discr_loss = discr_loss_orig + discr_loss_wmd
+            discr_loss_history.append(discr_loss.item())
             ## total loss
-            total_loss = percept_loss + integ_loss
+            total_loss = percept_loss + integ_loss + discr_loss
 
             # backward
             total_loss.backward()
@@ -187,15 +221,18 @@ class Solver(object):
                 self.optim_inn1.step()
             if eval(self.config_t["train"]["optim2_step"]):
                 self.optim_inn2.step()
-
+            if eval(self.config_t["train"]["optim3_step"]):
+                self.optim_com.step()
             self.optim_inn1.zero_grad()
             self.optim_inn2.zero_grad()
+            self.optim_com.zero_grad()
 
             # log
             print(
                 f"[IDEAW]:[{iter+1}/{n_iterations}]",
-                f"loss_percept={percept_loss:.6f}",
-                f"loss_integ={integ_loss:6f}",
+                f"loss_percept={percept_loss.item():.6f}",
+                f"loss_integ={integ_loss.item():6f}",
+                f"loss_discr={discr_loss.item():6f}",
                 end="\r",
             )
 

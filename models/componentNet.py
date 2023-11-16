@@ -23,7 +23,7 @@ class Discriminator(nn.Module):
             nn.Sigmoid(),
         )
 
-    def __forward__(self, data):  # audio data in time domain
+    def forward(self, data):  # audio data in time domain
         return self.net(data)
 
     def load_config(self, config_path):

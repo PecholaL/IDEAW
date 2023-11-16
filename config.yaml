@@ -4,6 +4,7 @@ train:
   num_workers: 0
   lr1: 1e-5 # use str
   lr2: 1e-5 # use str
+  lr3: 1e-5 # use str
   beta1: 0.5
   beta2: 0.999
   eps: 1e-6 # use str
@@ -12,3 +13,4 @@ train:
   gamma: 0.98
   optim1_step: True
   optim2_step: True
+  optim3_step: True
