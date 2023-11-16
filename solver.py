@@ -146,22 +146,21 @@ class Solver(object):
             audio_wmd1, audio_wmd1_stft = self.model.embed_msg(
                 host_audio, watermark_msg
             )
-            print("f1ok")
+
             ## get msg from 1st embedding
             msg_extr1 = self.model.extract_msg(audio_wmd1_stft)
-            print("e1ok")
 
             # forward 2
             audio_wmd2, audio_wmd2_stft = self.model.embed_lcode(
                 audio_wmd1_stft, locate_code
             )
-            print("f2ok")
+
             ## get lcode from 2nd embedding
             mid_stft, lcode_extr = self.model.extract_lcode(audio_wmd2_stft)
-            print("e2ok")
+
             ## get msg after extracting lcode
             msg_extr2 = self.model.extract_msg(mid_stft)
-            print("e12ok")
+
             # loss
             percept_loss_history = []
             integ_loss_history = []
@@ -184,9 +183,9 @@ class Solver(object):
             # backward
             total_loss.backward()
 
-            if self.config_t["train"]["optim1_step"]:
+            if eval(self.config_t["train"]["optim1_step"]):
                 self.optim_inn1.step()
-            if self.config_t["train"]["optim2_step"]:
+            if eval(self.config_t["train"]["optim2_step"]):
                 self.optim_inn2.step()
 
             self.optim_inn1.zero_grad()

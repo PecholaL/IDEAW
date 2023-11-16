@@ -36,18 +36,20 @@ if __name__ == "__main__":
     print(f"[Dataset]got {len(audio_path_list)} audio files")
 
     for i, audio_path in enumerate(audio_path_list):
-        if i % 1000 == 0 or i == len(audio_path_list) - 1:
-            print(f"[Dataset]processed {i} audio files")
         # Read & Resample
         audio, _, _ = read_resample(
             audio_path=audio_path, sr=sample_rate, audio_limit_len=None
         )
         audio_len = audio_len_second(audio, sample_rate)
         sample_num = int(audio_len / audio_segment_len)
-        for i in range(sample_num):
-            audio_segment = audio[i * sample_rate : (i + 1) * sample_rate]
+        for j in range(sample_num):
+            audio_segment = audio[j * sample_rate : (j + 1) * sample_rate]
             data.append(audio_segment)
-    print(f"[Dataset]got {len(data)} training samples")
+        print(
+            f"[Dataset]processed {i+1} audio file(s), got {len(data)} training sample(s)",
+            end="\r",
+        )
+    print()
 
     # Dump Pickle
     with open(os.path.join(out_path, "audio.pkl"), "wb") as f:
