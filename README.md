@@ -24,7 +24,9 @@ Finally, solver.py provides the optimizer of IDEAW.
 Note that all the configurations of the model are located in *./models/config.yaml*.
 
 ### Training
-**(\*)** `./train.sh`
+**(\*)** Modify the training configuration *./config.yaml* and the paths of the related configurations and dataset in *./train.sh*.
+**(\*)** Train the model, enjoy it 🍸:
+   `./train.sh`
 
 ### Embedding and Extraction
 *embed_extract.py* provides the embedding and extracting processes of audio watermark via the traned **IDEAW**.
