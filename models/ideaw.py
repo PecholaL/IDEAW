@@ -14,8 +14,8 @@ class IDEAW(nn.Module):
     def __init__(self, config_path):
         super(IDEAW, self).__init__()
         self.load_config(config_path)
-        self.hinet_1 = Mihnet_s1(config_path)  # for embedding msg
-        self.hinet_2 = Mihnet_s2(config_path)  # for embedding locating code
+        self.hinet_1 = Mihnet_s1(config_path, self.num_inn)  # for embedding msg
+        self.hinet_2 = Mihnet_s2(config_path, self.num_inn)  # for embedding lcode
         self.msg_fc = nn.Linear(self.num_bit, self.num_point)
         self.msg_fc_back = nn.Linear(self.num_point, self.num_bit)
         self.lcode_fc = nn.Linear(self.num_lc_bit, self.num_point)
@@ -28,6 +28,7 @@ class IDEAW(nn.Module):
             self.win_len = config["IDEAW"]["win_len"]
             self.n_fft = config["IDEAW"]["n_fft"]
             self.hop_len = config["IDEAW"]["hop_len"]
+            self.num_inn = config["IDEAW"]["num_inn"]
             self.num_bit = config["IDEAW"]["num_bit"]
             self.num_lc_bit = config["IDEAW"]["num_lc_bit"]
             self.num_point = config["IDEAW"]["num_point"]

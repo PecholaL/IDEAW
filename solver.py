@@ -72,74 +72,78 @@ class Solver(object):
         param_discr = list(
             filter(lambda p: p.requires_grad, self.model.discriminator.parameters())
         )
+        # param_att =
         lr1 = eval(self.config_t["train"]["lr1"])
         lr2 = eval(self.config_t["train"]["lr2"])
-        lr3 = eval(self.config_t["train"]["lr3"])
+        # lr3 = eval(self.config_t["train"]["lr3"])
         beta1 = self.config_t["train"]["beta1"]
         beta2 = self.config_t["train"]["beta2"]
         eps = eval(self.config_t["train"]["eps"])
         weight_decay = eval(self.config_t["train"]["weight_decay"])
-        self.optim_inn1 = torch.optim.Adam(
-            param_hinet1,
+        self.optim_inn = torch.optim.Adam(
+            param_hinet1 + param_hinet2,
             lr=lr1,
             betas=(beta1, beta2),
             eps=eps,
             weight_decay=weight_decay,
         )
-        self.optim_inn2 = torch.optim.Adam(
-            param_hinet2,
+        self.optim_discr = torch.optim.Adam(
+            param_discr,
             lr=lr2,
             betas=(beta1, beta2),
             eps=eps,
             weight_decay=weight_decay,
         )
-        self.optim_com = torch.optim.Adam(
-            param_discr,
-            lr=lr3,
-            betas=(beta1, beta2),
-            eps=eps,
-            weight_decay=weight_decay,
-        )
+        # self.optim_att = torch.optim.Adam(
+        #     param_att,
+        #     lr=lr3,
+        #     betas=(beta1, beta2),
+        #     eps=eps,
+        #     weight_decay=weight_decay,
+        # )
         self.weight_scheduler1 = torch.optim.lr_scheduler.StepLR(
-            self.optim_inn1,
+            self.optim_inn,
             self.config_t["train"]["weight_step"],
             gamma=self.config_t["train"]["gamma"],
         )
         self.weight_scheduler2 = torch.optim.lr_scheduler.StepLR(
-            self.optim_inn2,
+            self.optim_discr,
             self.config_t["train"]["weight_step"],
             gamma=self.config_t["train"]["gamma"],
         )
-        self.weight_scheduler3 = torch.optim.lr_scheduler.StepLR(
-            self.optim_com,
-            self.config_t["train"]["weight_step"],
-            gamma=self.config_t["train"]["gamma"],
-        )
+        # self.weight_scheduler2 = torch.optim.lr_scheduler.StepLR(
+        #     self.optim_discr,
+        #     self.config_t["train"]["weight_step"],
+        #     gamma=self.config_t["train"]["gamma"],
+        # )
         print("[IDEAW]optimizers built")
 
     # autosave, called in training
     def save_model(self):
         torch.save(self.model.state_dict(), f"{self.args.store_model_path}ideaw.ckpt")
         torch.save(
-            self.optim_inn1.state_dict(), f"{self.args.store_model_path}optim1.opt"
+            self.optim_inn.state_dict(), f"{self.args.store_model_path}optim1.opt"
         )
         torch.save(
-            self.optim_inn2.state_dict(), f"{self.args.store_model_path}optim2.opt"
+            self.optim_discr.state_dict(), f"{self.args.store_model_path}optim2.opt"
         )
-        torch.save(
-            self.optim_com.state_dict(), f"{self.args.store_model_path}optim3.opt"
-        )
+        # torch.save(
+        #     self.optim_att.state_dict(), f"{self.args.store_model_path}optim3.opt"
+        # )
 
     # load trained model
     def load_model(self):
         print(f"[IDEAW]load model from {self.args.load_model_path}")
         self.model.load_state_dict(torch.load(f"{self.args.load_model_path}ideaw.ckpt"))
-        self.optim_inn1.load_state_dict(
+        self.optim_inn.load_state_dict(
             torch.load(f"{self.args.load_model_path}optim1.opt")
         )
-        self.optim_inn2.load_state_dict(
+        self.optim_discr.load_state_dict(
             torch.load(f"{self.args.load_model_path}optim2.opt")
         )
+        # self.optim_att.load_state_dict(
+        #     torch.load(f"{self.args.load_model_path}optim3.opt")
+        # )
         return
 
     # loss criterion
@@ -218,14 +222,14 @@ class Solver(object):
             total_loss.backward()
 
             if eval(self.config_t["train"]["optim1_step"]):
-                self.optim_inn1.step()
+                self.optim_inn.step()
             if eval(self.config_t["train"]["optim2_step"]):
-                self.optim_inn2.step()
-            if eval(self.config_t["train"]["optim3_step"]):
-                self.optim_com.step()
-            self.optim_inn1.zero_grad()
-            self.optim_inn2.zero_grad()
-            self.optim_com.zero_grad()
+                self.optim_discr.step()
+            # if eval(self.config_t["train"]["optim3_step"]):
+            #     self.optim_att.step()
+            self.optim_inn.zero_grad()
+            self.optim_discr.zero_grad()
+            # self.optim_com.zero_grad()
 
             # log
             print(

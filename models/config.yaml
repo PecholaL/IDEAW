@@ -1,6 +1,7 @@
 # IDEAW model configuration
 
 IDEAW:
+  num_inn: 2
   ## for STFT and ISTFT
   n_fft: 1000
   hop_len: 250

@@ -8,56 +8,30 @@ from models.innBlock import InnBlock
 
 
 class Mihnet_s1(nn.Module):
-    def __init__(self, config_path):
+    def __init__(self, config_path, num_inn):
         super(Mihnet_s1, self).__init__()
-        self.inv1 = InnBlock(config_path)
-        self.inv2 = InnBlock(config_path)
-        self.inv3 = InnBlock(config_path)
-        self.inv4 = InnBlock(config_path)
-
-        self.inv5 = InnBlock(config_path)
-        self.inv6 = InnBlock(config_path)
-        self.inv7 = InnBlock(config_path)
-        self.inv8 = InnBlock(config_path)
+        self.innbs = nn.ModuleList([InnBlock(config_path) for _ in range(num_inn)])
 
     def forward(self, a, m, rev=False):
         if not rev:
-            a_out, m_out = self.inv1(a, m)
-            a_out, m_out = self.inv2(a_out, m_out)
-            a_out, m_out = self.inv3(a_out, m_out)
-            a_out, m_out = self.inv4(a_out, m_out)
+            for innb in self.innbs:
+                a, m = innb(a, m)
         else:
-            a_out, m_out = self.inv5(a, m, rev=True)
-            a_out, m_out = self.inv6(a_out, m_out, rev=True)
-            a_out, m_out = self.inv7(a_out, m_out, rev=True)
-            a_out, m_out = self.inv8(a_out, m_out, rev=True)
-
-        return a_out, m_out
+            for innb in reversed(self.innbs):
+                a, m = innb(a, m, rev=True)
+        return a, m
 
 
 class Mihnet_s2(nn.Module):
-    def __init__(self, config_path):
+    def __init__(self, config_path, num_inn):
         super(Mihnet_s2, self).__init__()
-        self.inv1 = InnBlock(config_path)
-        self.inv2 = InnBlock(config_path)
-        self.inv3 = InnBlock(config_path)
-        self.inv4 = InnBlock(config_path)
-
-        self.inv5 = InnBlock(config_path)
-        self.inv6 = InnBlock(config_path)
-        self.inv7 = InnBlock(config_path)
-        self.inv8 = InnBlock(config_path)
+        self.innbs = nn.ModuleList([InnBlock(config_path) for _ in range(num_inn)])
 
     def forward(self, a, m, rev=False):
         if not rev:
-            a_out, m_out = self.inv1(a, m)
-            a_out, m_out = self.inv2(a_out, m_out)
-            a_out, m_out = self.inv3(a_out, m_out)
-            a_out, m_out = self.inv4(a_out, m_out)
+            for innb in self.innbs:
+                a, m = innb(a, m)
         else:
-            a_out, m_out = self.inv5(a, m, rev=True)
-            a_out, m_out = self.inv6(a_out, m_out, rev=True)
-            a_out, m_out = self.inv7(a_out, m_out, rev=True)
-            a_out, m_out = self.inv8(a_out, m_out, rev=True)
-
-        return a_out, m_out
+            for innb in reversed(self.innbs):
+                a, m = innb(a, m, rev=True)
+        return a, m
