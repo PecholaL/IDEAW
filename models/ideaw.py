@@ -22,6 +22,28 @@ class IDEAW(nn.Module):
         self.lcode_fc_back = nn.Linear(self.num_point, self.num_lc_bit)
         self.discriminator = Discriminator(config_path)
 
+    def forward(self, audio, msg, lcode):
+        audio_wmd1, audio_wmd1_stft = self.embed_msg(audio, msg)
+        msg_extr1 = self.extract_msg(audio_wmd1_stft)
+        audio_wmd2, audio_wmd2_stft = self.embed_lcode(audio_wmd1_stft, lcode)
+        mid_stft, lcode_extr = self.extract_lcode(audio_wmd2_stft)
+        msg_extr2 = self.extract_msg(mid_stft)
+
+        orig_output = self.discriminator(audio)
+        wmd_output = self.discriminator(audio_wmd2)
+
+        return (
+            audio_wmd1,
+            audio_wmd1_stft,
+            audio_wmd2,
+            audio_wmd2_stft,
+            msg_extr1,
+            msg_extr2,
+            lcode_extr,
+            orig_output,
+            wmd_output,
+        )
+
     def load_config(self, config_path):
         with open(config_path) as f:
             config = yaml.load(f, Loader=yaml.FullLoader)

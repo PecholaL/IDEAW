@@ -170,33 +170,28 @@ class Solver(object):
             locate_code = torch.randint(
                 0, 2, (self.batch_size, lcode_len), dtype=torch.float
             )
+            orig_label = torch.ones((self.batch_size, 1))
+            wmd_label = torch.zeros((self.batch_size, 1))
+
             ## load to cuda
             host_audio = self.cc(host_audio)
             watermark_msg = self.cc(watermark_msg)
             locate_code = self.cc(locate_code)
+            orig_label = self.cc(orig_label)
+            wmd_label = self.cc(wmd_label)
 
-            # forward 1
-            audio_wmd1, audio_wmd1_stft = self.model.embed_msg(
-                host_audio, watermark_msg
-            )
-            ## get msg from 1st embedding
-            msg_extr1 = self.model.extract_msg(audio_wmd1_stft)
-
-            # forward 2
-            audio_wmd2, audio_wmd2_stft = self.model.embed_lcode(
-                audio_wmd1_stft, locate_code
-            )
-            ## get lcode from 2nd embedding
-            mid_stft, lcode_extr = self.model.extract_lcode(audio_wmd2_stft)
-            ## get msg after extracting lcode
-            msg_extr2 = self.model.extract_msg(mid_stft)
-
-            # discriminate
-            orig_label = self.cc(torch.ones((self.batch_size, 1)))
-            wmd_label = self.cc(torch.zeros((self.batch_size, 1)))
-
-            orig_output = self.model.discriminator(host_audio)
-            wmd_output = self.model.discriminator(audio_wmd2)
+            # forward
+            (
+                audio_wmd1,
+                _,
+                audio_wmd2,
+                _,
+                msg_extr1,
+                msg_extr2,
+                lcode_extr,
+                orig_output,
+                wmd_output,
+            ) = self.model(host_audio, watermark_msg, locate_code)
 
             # loss
             ## percept. loss
