@@ -31,7 +31,7 @@ Note that all the configurations of the model are located in *./models/config.ya
    `./train.sh`
 
 ### Embedding and Extraction
-*embed_extract.py* provides the embedding and extracting processes of audio watermark via the traned **IDEAW**.
+*embed_extract.py* provides the embedding and extracting processes of audio watermark via the trained **IDEAW**.
 
 ### Customizing Attack
 The attack types in attackLayer can be customized in *./models/attackLayer.py* to enhance the specific robustness of **IDEAW**.
