@@ -5,6 +5,8 @@
 import torch
 import torch.nn as nn
 
+from models.utils import initialize_weights
+
 
 class DenseBlock(nn.Module):
     def __init__(self, in_channel, out_channel, bias=True):
@@ -16,7 +18,7 @@ class DenseBlock(nn.Module):
         self.conv5 = nn.Conv2d(in_channel + 4 * 32, out_channel, 3, 1, 1, bias=bias)
         self.lrelu = nn.LeakyReLU(inplace=True)
         # initialization
-        # mutil.initialize_weights([self.conv5], 0.)
+        initialize_weights([self.conv5], 0.0)
 
     def forward(self, x):
         x1 = self.lrelu(self.conv1(x))
