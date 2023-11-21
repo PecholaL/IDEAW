@@ -1,7 +1,7 @@
 # IDEAW
 Robust Neural Audio Watermarking with Invertible Dual-Embedding
 
-**The code is currently under construction ☕️☕️☕️**
+**☕️☕️☕️**
 
 ## Training IDEAW
 "**(\*)**" means **necessary** steps
