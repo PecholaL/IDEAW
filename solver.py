@@ -160,15 +160,15 @@ class Solver(object):
         discr_loss_history = []
         for iter in range(n_iterations):
             # get data for current iteration
-            host_audio = next(self.train_iter).float()
+            host_audio = next(self.train_iter).to(torch.float32)
             msg_len = self.config_model["IDEAW"]["num_bit"]
             lcode_len = self.config_model["IDEAW"]["num_lc_bit"]
             watermark_msg = torch.randint(
-                0, 2, (self.batch_size, msg_len), dtype=torch.float
+                0, 2, (self.batch_size, msg_len), dtype=torch.float32
             )
             watermark_msg[watermark_msg == 0] = -1
             locate_code = torch.randint(
-                0, 2, (self.batch_size, lcode_len), dtype=torch.float
+                0, 2, (self.batch_size, lcode_len), dtype=torch.float32
             )
             orig_label = torch.ones((self.batch_size, 1))
             wmd_label = torch.zeros((self.batch_size, 1))

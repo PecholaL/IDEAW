@@ -26,6 +26,8 @@ class InnBlock(nn.Module):
         self.p = DenseBlock(self.channel, self.channel)
 
     def forward(self, x1, x2, rev=False):
+        x1 = x1.to(torch.float32)
+        x2 = x2.to(torch.float32)
         if not rev:
             t2 = self.f(x2)
             s2 = self.p(x2)
