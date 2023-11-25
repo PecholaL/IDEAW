@@ -8,7 +8,7 @@ import random
 import pickle
 import yaml
 
-from utils import *
+from .utils import *
 
 if __name__ == "__main__":
     config_path = "./data/config.yaml"
