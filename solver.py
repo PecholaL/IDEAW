@@ -166,7 +166,6 @@ class Solver(object):
             watermark_msg = torch.randint(
                 0, 2, (self.batch_size, msg_len), dtype=torch.float32
             )
-            watermark_msg[watermark_msg == 0] = -1
             locate_code = torch.randint(
                 0, 2, (self.batch_size, lcode_len), dtype=torch.float32
             )

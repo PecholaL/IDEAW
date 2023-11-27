@@ -33,4 +33,4 @@ if __name__ == "__main__":
     if args.iterations > 0:
         solver.train(n_iterations=args.iterations)
 
-    completed = input("[IDEAW]training completed")
+    completed = input("[IDEAW]training completed 🍹")

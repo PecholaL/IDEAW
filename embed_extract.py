@@ -37,7 +37,6 @@ if __name__ == "__main__":
 
     # generate msg and lcode
     watermark_msg = torch.randint(0, 2, (1, msg_bit), dtype=torch.float)
-    watermark_msg[watermark_msg == 0] = -1
     locate_code = torch.randint(0, 2, (1, lcode_bit), dtype=torch.float)
 
     # EMBEDDING
@@ -134,7 +133,7 @@ if __name__ == "__main__":
 
             # compute acc
             acc_lcode = calc_acc(extract_lcode, locate_code, 0.5)
-            acc_msg = calc_acc(extract_msg, watermark_msg, 0)
+            acc_msg = calc_acc(extract_msg, watermark_msg, 0.5)
 
             acc_lcode_list.append(acc_lcode)
             acc_msg_list.append(acc_msg)
@@ -144,6 +143,7 @@ if __name__ == "__main__":
 
     acc_lcode_all = numpy.array(acc_lcode_list)
     acc_msg_all = numpy.array(acc_msg_list)
+
     print(
         f"[IDEAW]lcode/msg acc: {acc_lcode_all.mean()}/{acc_msg_all.mean()}, \
         extraction time cost: {extract_time_cost}"
