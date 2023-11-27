@@ -7,7 +7,6 @@
 import numpy
 import time
 import torch
-import torch.nn as nn
 import tqdm
 from scipy.io.wavfile import write
 
