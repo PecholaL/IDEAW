@@ -17,9 +17,10 @@ class AttackLayer(nn.Module):
     def __init__(self, config_path):
         super(AttackLayer, self).__init__()
         self.load_config(config_path)
-        self.GaussianNoise = GaussianNoise(self.config)
-        self.Bandpass = Bandpass(self.config)
-        self.Dropout = Dropout(self.config)
+        self.gaussianNoise = GaussianNoise(self.config)
+        self.bandpass = Bandpass(self.config)
+        self.dropout = Dropout(self.config)
+        self.resample = Resample(self.config)
 
     def forward(self, audio):
         pass
@@ -76,3 +77,21 @@ class Dropout(nn.Module):
         mask_tensor = mask_tensor.expand_as(audio)
         output = audio * mask_tensor + host_audio * (1 - mask_tensor)
         return output
+
+
+class Resample(nn.Module):
+    def __init__(self, opt):
+        super(Dropout, self).__init__()
+        self.p = opt["AttackLayer"]["Resample"]["p"]
+
+    def forward(self, audio):
+        pass
+
+
+class AmplitudeModify(nn.Module):
+    def __init__(self, opt):
+        super(Dropout, self).__init__()
+        self.p = opt["AttackLayer"]["AmplitudeModify"]["p"]
+
+    def forward(self, audio):
+        pass

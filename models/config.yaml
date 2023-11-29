@@ -29,3 +29,7 @@ AttackLayer:
     p:
   Dropout:
     p:
+  Resample:
+    p:
+  AmplitudeModify:
+    p:
