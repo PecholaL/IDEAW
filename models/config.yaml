@@ -20,3 +20,12 @@ Discriminator:
   input_size: 16000
 
 Restorer:
+
+AttackLayer:
+  GaussianNoise:
+    mean: 
+    variance:
+    amplitude:
+    p:
+  Dropout:
+    p:
