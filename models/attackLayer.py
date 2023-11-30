@@ -40,19 +40,10 @@ class GaussianNoise(nn.Module):
         self.device = device
 
     def forward(self, audio):
-        if random.uniform(0, 1) < self.p:
-            b, c, h, w = audio.shape
-            Noise = self.amplitude * torch.Tensor(
-                numpy.random.normal(
-                    loc=self.mean, scale=self.variance, size=(b, 1, h, w)
-                )
-            ).to(self.device)
-            Noise = Noise.repeat(1, c, 1, 1)
-            output = Noise + audio
-            return output
-        else:
-            print("Gaussian noise error!")
-            exit()
+        # input: audio wave
+        noise = torch.randn(len(audio))
+        power_audio = torch.sum(audio**2) / len(audio)
+        power_noise = torch.sum(noise**2) / len(noise)
 
 
 class Bandpass(nn.Module):
