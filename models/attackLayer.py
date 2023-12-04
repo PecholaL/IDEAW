@@ -13,15 +13,17 @@ import torch
 import torch.nn as nn
 import yaml
 
+from scipy import signal
+
 
 class AttackLayer(nn.Module):
-    def __init__(self, config_path):
+    def __init__(self, config_path, device):
         super(AttackLayer, self).__init__()
         self.load_config(config_path)
-        self.gaussianNoise = GaussianNoise(self.config)
-        self.bandpass = Bandpass(self.config)
-        self.dropout = Dropout(self.config)
-        self.resample = Resample(self.config)
+        self.gaussianNoise = GaussianNoise(self.config, device)
+        self.bandpass = Bandpass(self.config, device)
+        self.dropout = Dropout(self.config, device)
+        self.resample = Resample(self.config, device)
 
     def forward(self, audio):
         pass
@@ -37,17 +39,16 @@ class GaussianNoise(nn.Module):
         self.snr = opt["AttackLayer"]["GaussianNoise"]["snr"]
         self.device = device
 
-    def forward(self, audio):
-        # input: audio wave
-        noise = torch.rand(len(audio))
-        p_s = torch.sum(audio**2) / len(audio)
-        p_n = torch.sum(noise**2) / len(noise)
+    def forward(self, audio):  # input: audio wave batch
+        B = audio.shape[0]
+        L = audio.shape[1]
+        noise = torch.rand([B, L]).to(self.device)
+        p_s = torch.sum(audio**2) / (B * L)
+        p_n = torch.sum(noise**2) / (B * L)
         k = math.sqrt(p_s / (10 ** (self.snr / 10) * p_n))
         noise_ = noise * k
-        p_n_ = torch.sum(noise_**2) / len(audio)
-        print(f"actual SNR: {10*math.log10(p_s/p_n_)}")
 
-        ret = audio + p_n_
+        ret = audio + noise_
         return ret
 
 
@@ -56,9 +57,13 @@ class Bandpass(nn.Module):
         super(Bandpass, self).__init__()
         self.upper = opt["AttackLayer"]["Bandpass"]["upper"]
         self.lower = opt["AttackLayer"]["Bandpass"]["lower"]
+        self.b, self.a = signal.butter(
+            8, [2 * self.lower / 16000, 2 * self.upper / 16000], "bandpass"
+        )
 
     def forward(self, audio):
-        pass
+        ret = signal.filtfilt(self.b, self.a, audio)
+        return ret
 
 
 class Dropout(nn.Module):
