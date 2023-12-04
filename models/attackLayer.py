@@ -34,17 +34,21 @@ class AttackLayer(nn.Module):
 class GaussianNoise(nn.Module):
     def __init__(self, opt, device):
         super(GaussianNoise, self).__init__()
-        self.mean = opt["AttackLayer"]["GaussianNoise"]["mean"]
-        self.variance = opt["AttackLayer"]["GaussianNoise"]["variance"]
-        self.amplitude = opt["AttackLayer"]["GaussianNoise"]["amplitude"]
-        self.p = opt["AttackLayer"]["GaussianNoise"]["p"]
+        self.snr = opt["AttackLayer"]["GaussianNoise"]["snr"]
         self.device = device
 
     def forward(self, audio):
         # input: audio wave
-        noise = torch.randn(len(audio))
-        power_audio = torch.sum(audio**2) / len(audio)
-        power_noise = torch.sum(noise**2) / len(noise)
+        noise = torch.rand(len(audio))
+        p_s = torch.sum(audio**2) / len(audio)
+        p_n = torch.sum(noise**2) / len(noise)
+        k = math.sqrt(p_s / (10 ** (self.snr / 10) * p_n))
+        noise_ = noise * k
+        p_n_ = torch.sum(noise_**2) / len(audio)
+        print(f"actual SNR: {10*math.log10(p_s/p_n_)}")
+
+        ret = audio + p_n_
+        return ret
 
 
 class Bandpass(nn.Module):

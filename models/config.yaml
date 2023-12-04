@@ -23,10 +23,7 @@ Restorer:
 
 AttackLayer:
   GaussianNoise:
-    mean: 
-    variance:
-    amplitude:
-    p:
+    snr: 10
   Dropout:
     p:
   Resample:
