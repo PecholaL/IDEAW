@@ -9,6 +9,7 @@
 import math
 import numpy
 import random
+import resampy
 import torch
 import torch.nn as nn
 import yaml
@@ -24,6 +25,7 @@ class AttackLayer(nn.Module):
         self.bandpass = Bandpass(self.config, device)
         self.dropout = Dropout(self.config, device)
         self.resample = Resample(self.config, device)
+        self.ampMdf = AmplitudeModify(self.config, device)
 
     def forward(self, audio):
         pass
@@ -53,40 +55,47 @@ class GaussianNoise(nn.Module):
 
 
 class Bandpass(nn.Module):
-    def __init__(self, opt):
+    def __init__(self, opt, device):
         super(Bandpass, self).__init__()
         self.upper = opt["AttackLayer"]["Bandpass"]["upper"]
         self.lower = opt["AttackLayer"]["Bandpass"]["lower"]
+        self.device = device
         self.b, self.a = signal.butter(
             8, [2 * self.lower / 16000, 2 * self.upper / 16000], "bandpass"
         )
 
     def forward(self, audio):
         ret = signal.filtfilt(self.b, self.a, audio)
+        ret = torch.from_numpy(ret.copy()).float().to(self.device)
         return ret
 
 
 class Dropout(nn.Module):
-    def __init__(self, opt):
+    def __init__(self, opt, device):
         super(Dropout, self).__init__()
         self.p = opt["AttackLayer"]["Dropout"]["p"]
+        self.device = device
 
     def forward(self, audio, host_audio):
         # p% bits replace with host audio
-        mask = numpy.random.choice([0.0, 1.0], audio.shape[2:], p=[self.p, 1 - self.p])
+        mask = numpy.random.choice([0.0, 1.0], audio.shape[1], p=[self.p, 1 - self.p])
         mask_tensor = torch.tensor(mask, device=audio.device, dtype=torch.float32)
         mask_tensor = mask_tensor.expand_as(audio)
-        output = audio * mask_tensor + host_audio * (1 - mask_tensor)
-        return output
+        ret = audio * mask_tensor + host_audio * (1 - mask_tensor)
+        return ret
 
 
 class Resample(nn.Module):
-    def __init__(self, opt):
+    def __init__(self, opt, device):
         super(Dropout, self).__init__()
-        self.p = opt["AttackLayer"]["Resample"]["p"]
+        self.sr = opt["AttackLayer"]["Resample"]["sr"]
+        self.device = device
 
     def forward(self, audio):
-        pass
+        audio = resampy.resample(audio, 16000, self.sr)
+        audio = resampy.resample(audio, self.sr, 16000)
+        audio = torch.from_numpy(audio).float().to(self.device)
+        return audio
 
 
 class AmplitudeModify(nn.Module):

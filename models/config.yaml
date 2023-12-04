@@ -24,9 +24,12 @@ Restorer:
 AttackLayer:
   GaussianNoise:
     snr: 10
+  Bandpass:
+    upper: 
+    lower: 
   Dropout:
-    p:
+    p: 0.05
   Resample:
-    p:
+    sr: 14400
   AmplitudeModify:
     p:
