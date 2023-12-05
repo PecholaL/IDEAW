@@ -32,8 +32,8 @@ AttackLayer:
   Resample:
     sr: 14400
   AmplitudeModify:
-    f: 0.90
+    f: 0.80
   Mp3Compress:
     bitrate: "64k"
   TimeStretch:
-    rate: 0.90
+    rate: 0.98
