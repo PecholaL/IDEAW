@@ -6,9 +6,9 @@
     * ...
 """
 
+import librosa
 import math
 import numpy
-import random
 import resampy
 import torch
 import torch.nn as nn
@@ -25,7 +25,8 @@ class AttackLayer(nn.Module):
         self.bandpass = Bandpass(self.config, device)
         self.dropout = Dropout(self.config, device)
         self.resample = Resample(self.config, device)
-        self.ampMdf = AmplitudeModify(self.config, device)
+        self.ampMdf = AmplitudeModify(self.config)
+        self.compress = Compress(self.config, device)
 
     def forward(self, audio):
         pass
@@ -101,7 +102,21 @@ class Resample(nn.Module):
 class AmplitudeModify(nn.Module):
     def __init__(self, opt):
         super(Dropout, self).__init__()
-        self.p = opt["AttackLayer"]["AmplitudeModify"]["p"]
+        self.f = opt["AttackLayer"]["AmplitudeModify"]["f"]
 
     def forward(self, audio):
-        pass
+        return audio * self.f
+
+
+class Compress(nn.Module):
+    def __init__(self, opt, device):
+        super(Compress, self).__init__()
+        self.threshold = opt["AttackLayer"]["Compression"]["threshold"]
+        self.cr = opt["AttackLayer"]["Compression"]["cr"]
+        self.device = device
+
+    def forward(self, audio):
+        audio_compressed = librosa.effects.compress(
+            audio, threshold=self.threshold, ratio=self.cr
+        )
+        return torch.from_numpy(audio_compressed).float().to(self.device)

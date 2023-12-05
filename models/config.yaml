@@ -25,11 +25,14 @@ AttackLayer:
   GaussianNoise:
     snr: 10
   Bandpass:
-    upper: 
-    lower: 
+    upper: 5000
+    lower: 1000
   Dropout:
     p: 0.05
   Resample:
     sr: 14400
   AmplitudeModify:
-    p:
+    f: 0.90
+  Compress:
+    threshold: -20.0
+    cr: 2
