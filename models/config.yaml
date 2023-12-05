@@ -36,3 +36,5 @@ AttackLayer:
   Compress:
     threshold: -20.0
     cr: 2
+  TimeStretch:
+    rate: 0.90

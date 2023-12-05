@@ -1,8 +1,13 @@
 """ Attack Simulate Layer
-    configuration is located at IDEAW/models/config
+    configuration is located at IDEAW/models/config.yaml
+    Each attack is designed in an sample-wise form, NOT FOR BATCH
     * Gaussian Noise
-    * Reverberation
-    * MP3 compress
+    * Bandpass
+    * Random Dropout
+    * Resample
+    * Amplitude Modify
+    * Lossy Compress
+    * Time Stretch
     * ...
 """
 
@@ -27,8 +32,9 @@ class AttackLayer(nn.Module):
         self.resample = Resample(self.config, device)
         self.ampMdf = AmplitudeModify(self.config)
         self.compress = Compress(self.config, device)
+        self.timeStretch = TimeStretch(device)
 
-    def forward(self, audio):
+    def forward(self, audio_batch):
         pass
 
     def load_config(self, config_path):
@@ -42,12 +48,11 @@ class GaussianNoise(nn.Module):
         self.snr = opt["AttackLayer"]["GaussianNoise"]["snr"]
         self.device = device
 
-    def forward(self, audio):  # input: audio wave batch
-        B = audio.shape[0]
-        L = audio.shape[1]
-        noise = torch.rand([B, L]).to(self.device)
-        p_s = torch.sum(audio**2) / (B * L)
-        p_n = torch.sum(noise**2) / (B * L)
+    def forward(self, audio):  # input: audio wave sample
+        l = len(audio)
+        noise = torch.rand(l).to(self.device)
+        p_s = torch.sum(audio**2) / l
+        p_n = torch.sum(noise**2) / l
         k = math.sqrt(p_s / (10 ** (self.snr / 10) * p_n))
         noise_ = noise * k
 
@@ -79,9 +84,8 @@ class Dropout(nn.Module):
 
     def forward(self, audio, host_audio):
         # p% bits replace with host audio
-        mask = numpy.random.choice([0.0, 1.0], audio.shape[1], p=[self.p, 1 - self.p])
+        mask = numpy.random.choice([0.0, 1.0], len(audio), p=[self.p, 1 - self.p])
         mask_tensor = torch.tensor(mask, device=audio.device, dtype=torch.float32)
-        mask_tensor = mask_tensor.expand_as(audio)
         ret = audio * mask_tensor + host_audio * (1 - mask_tensor)
         return ret
 
@@ -120,3 +124,19 @@ class Compress(nn.Module):
             audio, threshold=self.threshold, ratio=self.cr
         )
         return torch.from_numpy(audio_compressed).float().to(self.device)
+
+
+class TimeStretch(nn.Module):
+    def __init__(self, opt, device):
+        super(TimeStretch, self).__init__()
+        self.tsr = opt["AttackLayer"]["TimeStretch"]["rate"]
+        self.device = device
+
+    def forward(self, audio):
+        l = len(audio)
+        audio_s_1 = librosa.effects.time_stretch(audio.numpy, rate=self.tsr)
+        l_s_1 = len(audio_s_1)
+        tsr_r = l_s_1 / l + 0.00000001  # for sure that len(audio_s_2)>len(audio)
+        audio_s_2 = librosa.effects.time_stretch(audio_s_1, rate=tsr_r)
+        audio = audio_s_2[:l]
+        return torch.from_numpy(audio).float().to(self.device)
