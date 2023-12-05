@@ -33,8 +33,7 @@ AttackLayer:
     sr: 14400
   AmplitudeModify:
     f: 0.90
-  Compress:
-    threshold: -20.0
-    cr: 2
+  Mp3Compress:
+    bitrate: "192k"
   TimeStretch:
     rate: 0.90

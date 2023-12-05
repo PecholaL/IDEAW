@@ -14,6 +14,7 @@
 import librosa
 import math
 import numpy
+import pydub
 import resampy
 import torch
 import torch.nn as nn
@@ -31,8 +32,8 @@ class AttackLayer(nn.Module):
         self.dropout = Dropout(self.config, device)
         self.resample = Resample(self.config, device)
         self.ampMdf = AmplitudeModify(self.config)
-        self.compress = Compress(self.config, device)
-        self.timeStretch = TimeStretch(device)
+        self.mp3compress = Mp3Compress(self.config, device)
+        self.timeStretch = TimeStretch(self.config, device)
 
     def forward(self, audio_batch):
         pass
@@ -92,12 +93,12 @@ class Dropout(nn.Module):
 
 class Resample(nn.Module):
     def __init__(self, opt, device):
-        super(Dropout, self).__init__()
+        super(Resample, self).__init__()
         self.sr = opt["AttackLayer"]["Resample"]["sr"]
         self.device = device
 
     def forward(self, audio):
-        audio = resampy.resample(audio, 16000, self.sr)
+        audio = resampy.resample(audio.numpy(), 16000, self.sr)
         audio = resampy.resample(audio, self.sr, 16000)
         audio = torch.from_numpy(audio).float().to(self.device)
         return audio
@@ -105,25 +106,28 @@ class Resample(nn.Module):
 
 class AmplitudeModify(nn.Module):
     def __init__(self, opt):
-        super(Dropout, self).__init__()
+        super(AmplitudeModify, self).__init__()
         self.f = opt["AttackLayer"]["AmplitudeModify"]["f"]
 
     def forward(self, audio):
         return audio * self.f
 
 
-class Compress(nn.Module):
+class Mp3Compress(nn.Module):
     def __init__(self, opt, device):
-        super(Compress, self).__init__()
-        self.threshold = opt["AttackLayer"]["Compression"]["threshold"]
-        self.cr = opt["AttackLayer"]["Compression"]["cr"]
+        super(Mp3Compress, self).__init__()
+        self.bitrate = opt["AttackLayer"]["Mp3Compress"]["bitrate"]
         self.device = device
 
     def forward(self, audio):
-        audio_compressed = librosa.effects.compress(
-            audio, threshold=self.threshold, ratio=self.cr
+        wav = audio.numpy()
+        wav_segment = pydub.AudioSegment(
+            wav.tobytes(), frame_rate=16000, sample_width=wav.dtype.itemize, channel=1
         )
-        return torch.from_numpy(audio_compressed).float().to(self.device)
+        mp3_byte = wav_segment.export(format="mp3", bitrate=self.bitrate).read()
+        mp3_segment = pydub.AudioSegment(mp3_byte, format="mp3")
+        wav_byte = mp3_segment.export(format="wav").read()
+        return torch.from_numpy(wav_byte).float().to(self.device)
 
 
 class TimeStretch(nn.Module):
@@ -134,7 +138,7 @@ class TimeStretch(nn.Module):
 
     def forward(self, audio):
         l = len(audio)
-        audio_s_1 = librosa.effects.time_stretch(audio.numpy, rate=self.tsr)
+        audio_s_1 = librosa.effects.time_stretch(audio.numpy(), rate=self.tsr)
         l_s_1 = len(audio_s_1)
         tsr_r = l_s_1 / l + 0.00000001  # for sure that len(audio_s_2)>len(audio)
         audio_s_2 = librosa.effects.time_stretch(audio_s_1, rate=tsr_r)
