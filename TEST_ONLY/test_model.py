@@ -8,7 +8,7 @@ sys.path.append("..")
 from models.ideaw import IDEAW
 from data.dataset import AWdataset, get_data_loader, infinite_iter
 
-IDEAW = IDEAW("config.yaml")
+IDEAW = IDEAW("../models/config.yaml")
 
 dataset = AWdataset("../../Watermark/miniAWdata_pickle/stft.pkl")
 loader = get_data_loader(dataset=dataset, batch_size=10, num_workers=0)

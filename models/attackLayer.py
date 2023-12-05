@@ -11,6 +11,7 @@
     * ...
 """
 
+import io
 import librosa
 import math
 import numpy
@@ -121,13 +122,21 @@ class Mp3Compress(nn.Module):
 
     def forward(self, audio):
         wav = audio.numpy()
+        sample_width = wav.dtype.itemsize
         wav_segment = pydub.AudioSegment(
-            wav.tobytes(), frame_rate=16000, sample_width=wav.dtype.itemize, channel=1
+            wav.tobytes(), frame_rate=16000, sample_width=sample_width, channels=1
         )
         mp3_byte = wav_segment.export(format="mp3", bitrate=self.bitrate).read()
-        mp3_segment = pydub.AudioSegment(mp3_byte, format="mp3")
+        mp3_segment = pydub.AudioSegment.from_file(
+            io.BytesIO(mp3_byte),
+            format="mp3",
+            frame_rate=16000,
+            sample_width=sample_width,
+        )
+        mp3_segment = mp3_segment.set_frame_rate(16000).set_sample_width(sample_width)
         wav_byte = mp3_segment.export(format="wav").read()
-        return torch.from_numpy(wav_byte).float().to(self.device)
+        wav = numpy.frombuffer(wav_byte, dtype=numpy.float32)
+        return torch.from_numpy(wav.copy()).float().to(self.device)
 
 
 class TimeStretch(nn.Module):
