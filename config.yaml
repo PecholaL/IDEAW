@@ -13,5 +13,4 @@ train:
   gamma: 0.98
   optim1_step: "True"
   optim2_step: "True"
-  optim3_step: "True"
   

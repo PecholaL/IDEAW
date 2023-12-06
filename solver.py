@@ -94,62 +94,42 @@ class Solver(object):
             weight_decay=weight_decay,
         )
         self.optim_II = torch.optim.Adam(
-            param_att+,
+            param_att + param_balance,
             lr=lr2,
             betas=(beta1, beta2),
             eps=eps,
             weight_decay=weight_decay,
         )
-        # self.optim_att = torch.optim.Adam(
-        #     param_att,
-        #     lr=lr3,
-        #     betas=(beta1, beta2),
-        #     eps=eps,
-        #     weight_decay=weight_decay,
-        # )
         self.weight_scheduler1 = torch.optim.lr_scheduler.StepLR(
-            self.optim_inn,
+            self.optim_I,
             self.config_t["train"]["weight_step"],
             gamma=self.config_t["train"]["gamma"],
         )
         self.weight_scheduler2 = torch.optim.lr_scheduler.StepLR(
-            self.optim_discr,
+            self.optim_II,
             self.config_t["train"]["weight_step"],
             gamma=self.config_t["train"]["gamma"],
         )
-        # self.weight_scheduler2 = torch.optim.lr_scheduler.StepLR(
-        #     self.optim_discr,
-        #     self.config_t["train"]["weight_step"],
-        #     gamma=self.config_t["train"]["gamma"],
-        # )
         print("[IDEAW]optimizers built")
 
     # autosave, called in training
     def save_model(self):
         torch.save(self.model.state_dict(), f"{self.args.store_model_path}ideaw.ckpt")
+        torch.save(self.optim_I.state_dict(), f"{self.args.store_model_path}optim1.opt")
         torch.save(
-            self.optim_inn.state_dict(), f"{self.args.store_model_path}optim1.opt"
+            self.optim_II.state_dict(), f"{self.args.store_model_path}optim2.opt"
         )
-        torch.save(
-            self.optim_discr.state_dict(), f"{self.args.store_model_path}optim2.opt"
-        )
-        # torch.save(
-        #     self.optim_att.state_dict(), f"{self.args.store_model_path}optim3.opt"
-        # )
 
     # load trained model
     def load_model(self):
         print(f"[IDEAW]load model from {self.args.load_model_path}")
         self.model.load_state_dict(torch.load(f"{self.args.load_model_path}ideaw.ckpt"))
-        self.optim_inn.load_state_dict(
+        self.optim_I.load_state_dict(
             torch.load(f"{self.args.load_model_path}optim1.opt")
         )
-        self.optim_discr.load_state_dict(
+        self.optim_II.load_state_dict(
             torch.load(f"{self.args.load_model_path}optim2.opt")
         )
-        # self.optim_att.load_state_dict(
-        #     torch.load(f"{self.args.load_model_path}optim3.opt")
-        # )
         return
 
     # loss criterion
@@ -222,14 +202,11 @@ class Solver(object):
             total_loss.backward()
 
             if eval(self.config_t["train"]["optim1_step"]):
-                self.optim_inn.step()
+                self.optim_I.step()
             if eval(self.config_t["train"]["optim2_step"]):
-                self.optim_discr.step()
-            # if eval(self.config_t["train"]["optim3_step"]):
-            #     self.optim_att.step()
-            self.optim_inn.zero_grad()
-            self.optim_discr.zero_grad()
-            # self.optim_com.zero_grad()
+                self.optim_II.step()
+            self.optim_I.zero_grad()
+            self.optim_II.zero_grad()
 
             # log
             print(
