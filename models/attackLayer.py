@@ -36,6 +36,7 @@ class AttackLayer(nn.Module):
         self.ampMdf = AmplitudeModify(self.config)
         self.mp3compress = Mp3Compress(self.config, device)
         self.timeStretch = TimeStretch(self.config, device)
+        self.
 
     def forward(self, audio_batch):
         pass
