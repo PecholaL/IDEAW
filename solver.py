@@ -10,9 +10,10 @@ from models.ideaw import IDEAW
 
 
 class Solver(object):
-    def __init__(self, config_data_path, config_model_path, args):
+    def __init__(self, config_data_path, config_model_path, device, args):
         self.config_data_path = config_data_path
         self.config_model_path = config_model_path
+        self.device = device
         self.args = args  # training config inside
 
         with open(self.config_data_path) as f:
@@ -53,7 +54,7 @@ class Solver(object):
 
     # called in Solver.init
     def build_model(self):
-        self.model = self.cc(IDEAW(self.config_model_path))
+        self.model = self.cc(IDEAW(self.config_model_path, self.device))
         print("[IDEAW]model built")
         print(
             "[IDEAW]total parameter count: {}".format(

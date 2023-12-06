@@ -12,7 +12,7 @@ from models.attackLayer import AttackLayer
 
 
 class IDEAW(nn.Module):
-    def __init__(self, config_path):
+    def __init__(self, config_path, device):
         super(IDEAW, self).__init__()
         self.load_config(config_path)
         self.hinet_1 = Mihnet_s1(config_path, self.num_inn)  # for embedding msg
@@ -22,7 +22,7 @@ class IDEAW(nn.Module):
         self.lcode_fc = nn.Linear(self.num_lc_bit, self.num_point)
         self.lcode_fc_back = nn.Linear(self.num_point, self.num_lc_bit)
         self.discriminator = Discriminator(config_path)
-        self.attack_layer = AttackLayer(config_path)
+        self.attack_layer = AttackLayer(config_path, device)
         self.balance_block = BalanceBlock(config_path)
 
     def forward(self, audio, msg, lcode, robustness):

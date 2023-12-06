@@ -8,10 +8,11 @@ sys.path.append("..")
 from models.ideaw import IDEAW
 from data.dataset import AWdataset, get_data_loader, infinite_iter
 
-IDEAW = IDEAW("../models/config.yaml")
+IDEAW = IDEAW("../models/config.yaml", "cpu")
 
-dataset = AWdataset("../../Watermark/miniAWdata_pickle/stft.pkl")
-loader = get_data_loader(dataset=dataset, batch_size=10, num_workers=0)
+# prepare data
+dataset = AWdataset("../../Watermark/miniAWdata_pickle/audio.pkl")
+loader = get_data_loader(dataset=dataset, batch_size=1, num_workers=0)
 INF_loader = infinite_iter(loader)
 
 data = next(INF_loader)
@@ -30,7 +31,7 @@ print(f"audio shape: {audio.shape}")
 print(f"stft audio shape: {audio_stft.shape}")
 print(f"msg&lcode shape: {msg.shape}&{lcode.shape}")
 
-
+"""
 # embedding msg and lcode into 1 second chunk
 chunk_size = 16000
 chunk = audio[:, 0 : 0 + chunk_size]  # 1s
@@ -51,3 +52,26 @@ print(f"mid signal shape: {mid_stft.shape}")
 
 extr_msg = IDEAW.extract_msg(mid_stft).int().detach().cpu().numpy()
 print(f"extracted msg shape: {extr_msg.shape}")
+"""
+
+# test the forward of IDEAW
+(
+    audio_wmd1,
+    audio_wmd1_stft,
+    audio_wmd2,
+    audio_wmd2_stft,
+    msg_extr1,
+    msg_extr2,
+    lcode_extr,
+    orig_output,
+    wmd_output,
+) = IDEAW(data, msg, lcode, True)
+print(audio_wmd1.shape)
+print(audio_wmd1_stft.shape)
+print(audio_wmd2.shape)
+print(audio_wmd2_stft.shape)
+print(msg_extr1.shape)
+print(msg_extr2.shape)
+print(lcode_extr.shape)
+print(orig_output.shape)
+print(wmd_output.shape)
