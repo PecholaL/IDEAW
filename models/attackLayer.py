@@ -29,7 +29,6 @@ class AttackLayer(nn.Module):
     def __init__(self, config_path, device):
         super(AttackLayer, self).__init__()
         self.load_config(config_path)
-        self.sample_rate = 16000
         self.gaussianNoise = GaussianNoise(self.config, device)
         self.bandpass = Bandpass(self.config, device)
         self.dropout = Dropout(self.config, device)
@@ -67,12 +66,13 @@ class GaussianNoise(nn.Module):
 class Bandpass(nn.Module):
     def __init__(self, opt, device):
         super(Bandpass, self).__init__()
+        self.sr = opt["AttackLayer"]["Bandpass"]["sr"]
         self.upper = opt["AttackLayer"]["Bandpass"]["upper"]
         self.lower = opt["AttackLayer"]["Bandpass"]["lower"]
         self.device = device
         self.b, self.a = signal.butter(
             8,
-            [2 * self.lower / self.sample_rate, 2 * self.upper / self.sample_rate],
+            [2 * self.lower / self.sr, 2 * self.upper / self.sr],
             "bandpass",
         )
 
@@ -99,12 +99,13 @@ class Dropout(nn.Module):
 class Resample(nn.Module):
     def __init__(self, opt, device):
         super(Resample, self).__init__()
+        self.orig_sr = opt["AttackLayer"]["Resample"]["orig_sr"]
         self.sr = opt["AttackLayer"]["Resample"]["sr"]
         self.device = device
 
     def forward(self, audio):
-        audio = resampy.resample(audio.numpy(), self.sample_rate, self.sr)
-        audio = resampy.resample(audio, self.sr, self.sample_rate)
+        audio = resampy.resample(audio.numpy(), self.orig_sr, self.sr)
+        audio = resampy.resample(audio, self.sr, self.orig_sr)
         audio = torch.from_numpy(audio).float().to(self.device)
         return audio
 
@@ -121,38 +122,22 @@ class AmplitudeModify(nn.Module):
 class Mp3Compress(nn.Module):
     def __init__(self, opt, device):
         super(Mp3Compress, self).__init__()
+        self.sr = opt["AttackLayer"]["Mp3Compress"]["sr"]
         self.bitrate = opt["AttackLayer"]["Mp3Compress"]["bitrate"]
         self.device = device
 
     def forward(self, audio):
-        wav = audio.numpy()
-        sample_width = wav.dtype.itemsize
-        write("tmp.wav", self.sample_rate, wav)
-        wav_segment = pydub.AudioSegment(
-            wav.tobytes(),
-            frame_rate=self.sample_rate,
-            sample_width=sample_width,
-            channels=1,
-        )
-        print(len(wav))
-        print(len(wav.tobytes()))
+        write("tmp.wav", self.sr, audio.numpy())
+        wav_segment = pydub.AudioSegment.from_wav("tmp.wav")
         wav_segment.export(
-            "/Users/pecholalee/Coding/Watermark/ideaw_data/output/mp3test.wav",
-            format="wav",
-            # bitrate=self.bitrate,
+            "tmp.mp3",
+            format="mp3",
+            bitrate=self.bitrate,
         )
-        return torch.from_numpy(wav).float().to(self.device)
-        # mp3_byte = wav_segment.export(format="mp3", bitrate=self.bitrate).read()
-        # mp3_segment = pydub.AudioSegment.from_file(
-        #     io.BytesIO(mp3_byte),
-        #     format="mp3",
-        #     frame_rate=self.sample_rate,
-        #     sample_width=sample_width,
-        # )
-        # mp3_segment = mp3_segment.set_frame_rate(16000).set_sample_width(sample_width)
-        # wav_byte = mp3_segment.export(format="wav").read()
-        # wav = numpy.frombuffer(wav_byte, dtype=numpy.float32)
-        # return torch.from_numpy(wav.copy()).float().to(self.device)
+        mp3_segment = pydub.AudioSegment.from_mp3("tmp.mp3")
+        mp3_segment.export("tmp.wav", format="wav")
+        wav, _ = librosa.load("tmp.wav", sr=self.sr)
+        return torch.from_numpy(wav.copy()).float().to(self.device)
 
 
 class TimeStretch(nn.Module):

@@ -25,15 +25,18 @@ AttackLayer:
   GaussianNoise:
     snr: 15
   Bandpass:
+    sr: 16000
     upper: 5000
     lower: 1000
   Dropout:
     p: 0.05
   Resample:
+    orig_sr: 16000
     sr: 14400
   AmplitudeModify:
     f: 0.80
   Mp3Compress:
-    bitrate: "192k"
+    sr: 16000
+    bitrate: "16k"
   TimeStretch:
     rate: 0.98
