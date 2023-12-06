@@ -19,40 +19,40 @@ d, sr = soundfile.read("/Users/pecholalee/Coding/Watermark/miniAWdata/p225_003.w
 d = torch.from_numpy(d).float()
 print(f"audio shape: {d.shape}, audio device: {d.device}")
 
-# GNoise
-d_gn = att.gaussianNoise(d)
-print("Gaussian Noise")
-print(d_gn.shape, d_gn.device)
+# # GNoise
+# d_gn = att.gaussianNoise(d)
+# print("Gaussian Noise")
+# print(d_gn.shape, d_gn.device)
 
-# BPass
-d_bpf = att.bandpass(d)
-print("Band Pass")
-print(d_bpf.shape, d_bpf.device)
+# # BPass
+# d_bpf = att.bandpass(d)
+# print("Band Pass")
+# print(d_bpf.shape, d_bpf.device)
 
-# Dropout
-d_do = att.dropout(d, d)
-print("Dropout")
-print(d_do.shape, d_do.device)
+# # Dropout
+# d_do = att.dropout(d, d)
+# print("Dropout")
+# print(d_do.shape, d_do.device)
 
-# Resample
-d_rs = att.resample(d)
-print("Resample")
-print(d_rs.shape, d_rs.device)
+# # Resample
+# d_rs = att.resample(d)
+# print("Resample")
+# print(d_rs.shape, d_rs.device)
 
-# AModify
-d_am = att.ampMdf(d)
-print("Amplitude Modify")
-print(d_am.shape, d_am.device)
+# # AModify
+# d_am = att.ampMdf(d)
+# print("Amplitude Modify")
+# print(d_am.shape, d_am.device)
 
 # Mp3Compress
 d_mp = att.mp3compress(d)
 print("Mp3 Compress")
-print(d_mp.shape, d_mp.device)
+# print(d_mp.shape, d_mp.device)
 
-# Time Stretch
-d_ts = att.timeStretch(d)
-print("Time Stretch")
-print(d_ts.shape, d_ts.device)
+# # Time Stretch
+# d_ts = att.timeStretch(d)
+# print("Time Stretch")
+# print(d_ts.shape, d_ts.device)
 
 # plot
 d_np = d_mp.numpy()

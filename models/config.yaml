@@ -34,6 +34,6 @@ AttackLayer:
   AmplitudeModify:
     f: 0.80
   Mp3Compress:
-    bitrate: "64k"
+    bitrate: "192k"
   TimeStretch:
     rate: 0.98

@@ -22,12 +22,14 @@ import torch.nn as nn
 import yaml
 
 from scipy import signal
+from scipy.io.wavfile import write
 
 
 class AttackLayer(nn.Module):
     def __init__(self, config_path, device):
         super(AttackLayer, self).__init__()
         self.load_config(config_path)
+        self.sample_rate = 16000
         self.gaussianNoise = GaussianNoise(self.config, device)
         self.bandpass = Bandpass(self.config, device)
         self.dropout = Dropout(self.config, device)
@@ -69,7 +71,9 @@ class Bandpass(nn.Module):
         self.lower = opt["AttackLayer"]["Bandpass"]["lower"]
         self.device = device
         self.b, self.a = signal.butter(
-            8, [2 * self.lower / 16000, 2 * self.upper / 16000], "bandpass"
+            8,
+            [2 * self.lower / self.sample_rate, 2 * self.upper / self.sample_rate],
+            "bandpass",
         )
 
     def forward(self, audio):
@@ -99,8 +103,8 @@ class Resample(nn.Module):
         self.device = device
 
     def forward(self, audio):
-        audio = resampy.resample(audio.numpy(), 16000, self.sr)
-        audio = resampy.resample(audio, self.sr, 16000)
+        audio = resampy.resample(audio.numpy(), self.sample_rate, self.sr)
+        audio = resampy.resample(audio, self.sr, self.sample_rate)
         audio = torch.from_numpy(audio).float().to(self.device)
         return audio
 
@@ -123,20 +127,32 @@ class Mp3Compress(nn.Module):
     def forward(self, audio):
         wav = audio.numpy()
         sample_width = wav.dtype.itemsize
+        write("tmp.wav", self.sample_rate, wav)
         wav_segment = pydub.AudioSegment(
-            wav.tobytes(), frame_rate=16000, sample_width=sample_width, channels=1
-        )
-        mp3_byte = wav_segment.export(format="mp3", bitrate=self.bitrate).read()
-        mp3_segment = pydub.AudioSegment.from_file(
-            io.BytesIO(mp3_byte),
-            format="mp3",
-            frame_rate=16000,
+            wav.tobytes(),
+            frame_rate=self.sample_rate,
             sample_width=sample_width,
+            channels=1,
         )
-        mp3_segment = mp3_segment.set_frame_rate(16000).set_sample_width(sample_width)
-        wav_byte = mp3_segment.export(format="wav").read()
-        wav = numpy.frombuffer(wav_byte, dtype=numpy.float32)
-        return torch.from_numpy(wav.copy()).float().to(self.device)
+        print(len(wav))
+        print(len(wav.tobytes()))
+        wav_segment.export(
+            "/Users/pecholalee/Coding/Watermark/ideaw_data/output/mp3test.wav",
+            format="wav",
+            # bitrate=self.bitrate,
+        )
+        return torch.from_numpy(wav).float().to(self.device)
+        # mp3_byte = wav_segment.export(format="mp3", bitrate=self.bitrate).read()
+        # mp3_segment = pydub.AudioSegment.from_file(
+        #     io.BytesIO(mp3_byte),
+        #     format="mp3",
+        #     frame_rate=self.sample_rate,
+        #     sample_width=sample_width,
+        # )
+        # mp3_segment = mp3_segment.set_frame_rate(16000).set_sample_width(sample_width)
+        # wav_byte = mp3_segment.export(format="wav").read()
+        # wav = numpy.frombuffer(wav_byte, dtype=numpy.float32)
+        # return torch.from_numpy(wav.copy()).float().to(self.device)
 
 
 class TimeStretch(nn.Module):
