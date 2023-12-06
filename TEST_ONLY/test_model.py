@@ -31,30 +31,34 @@ print(f"audio shape: {audio.shape}")
 print(f"stft audio shape: {audio_stft.shape}")
 print(f"msg&lcode shape: {msg.shape}&{lcode.shape}")
 
-"""
-# embedding msg and lcode into 1 second chunk
-chunk_size = 16000
-chunk = audio[:, 0 : 0 + chunk_size]  # 1s
 
-chunk_wmd, chunk_wmd_stft = IDEAW.embed_msg(chunk, msg)
-chunk_wmd = chunk_wmd.detach().cpu()
-print(f"watermarked audio shape: {chunk_wmd.shape}")
+# # embedding msg and lcode into 1 second chunk
+# chunk_size = 16000
+# chunk = audio[:, 0 : 0 + chunk_size]  # 1s
 
-chunk_wmd_lcd, chunk_wmd_lcd_stft = IDEAW.embed_lcode(chunk_wmd_stft, lcode)
-print(f"lcode embedded audio shape: {chunk_wmd_lcd.shape}")
+# chunk_wmd, chunk_wmd_stft = IDEAW.embed_msg(chunk, msg)
+# chunk_wmd = chunk_wmd.detach().cpu()
+# print(f"watermarked audio shape: {chunk_wmd.shape}")
+
+# chunk_wmd_lcd, chunk_wmd_lcd_stft = IDEAW.embed_lcode(chunk_wmd_stft, lcode)
+# print(f"lcode embedded audio shape: {chunk_wmd_lcd.shape}")
 
 
-# extracing lcode and msg from chunk_wmd_lcd
-mid_stft, extr_lcode = IDEAW.extract_lcode(chunk_wmd_lcd_stft)
-extr_lcode = extr_lcode.int().detach()
-print(f"extracted lcode shape: {extr_lcode.shape}")
-print(f"mid signal shape: {mid_stft.shape}")
+# # extracing lcode and msg from chunk_wmd_lcd
+# mid_stft, extr_lcode = IDEAW.extract_lcode(chunk_wmd_lcd_stft)
+# extr_lcode = extr_lcode.int().detach()
+# print(f"extracted lcode shape: {extr_lcode.shape}")
+# print(f"mid signal shape: {mid_stft.shape}")
 
-extr_msg = IDEAW.extract_msg(mid_stft).int().detach().cpu().numpy()
-print(f"extracted msg shape: {extr_msg.shape}")
-"""
+# extr_msg = IDEAW.extract_msg(mid_stft).int().detach().cpu().numpy()
+# print(f"extracted msg shape: {extr_msg.shape}")
+
 
 # test the forward of IDEAW
+print("Input dtype:")
+print(data.dtype)
+print(msg.dtype)
+print(lcode.dtype)
 (
     audio_wmd1,
     audio_wmd1_stft,
@@ -66,6 +70,9 @@ print(f"extracted msg shape: {extr_msg.shape}")
     orig_output,
     wmd_output,
 ) = IDEAW(data, msg, lcode, True)
+
+
+print("Output shape:")
 print(audio_wmd1.shape)
 print(audio_wmd1_stft.shape)
 print(audio_wmd2.shape)

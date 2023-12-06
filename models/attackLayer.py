@@ -45,13 +45,14 @@ class AttackLayer(nn.Module):
         applied to EACH sample in the batch.
     """
 
-    def forward(self, audio_batch):
+    def forward(self, audio_batch, host_audio_batch):
         # orig shape [B, L]
         batch_size = audio_batch.shape[0]
         att_audio_list = []
         for i in range(batch_size):
             audio = audio_batch[i].squeeze()
-            att_index = random.randint(1, self.att_num)
+            # att_index = random.randint(1, self.att_num)
+            att_index = 8
             if att_index == 1:
                 att_audio = self.gaussianNoise(audio)
             elif att_index == 2:
@@ -59,7 +60,8 @@ class AttackLayer(nn.Module):
             elif att_index == 3:
                 att_audio = self.erase(audio)
             elif att_index == 4:
-                att_audio = self.dropout(audio)
+                host_audio = host_audio_batch[i].squeeze()
+                att_audio = self.dropout(audio, host_audio)
             elif att_index == 5:
                 att_audio = self.resample(audio)
             elif att_index == 6:
@@ -70,6 +72,7 @@ class AttackLayer(nn.Module):
                 att_audio = self.timeStretch(audio)
             att_audio_list.append(att_audio)
         ret = torch.stack(att_audio_list)
+        print("attatttatatatat")
         return ret
 
     def load_config(self, config_path):
@@ -109,7 +112,7 @@ class Bandpass(nn.Module):
         )
 
     def forward(self, audio):
-        ret = signal.filtfilt(self.b, self.a, audio)
+        ret = signal.filtfilt(self.b, self.a, audio.detach())
         ret = torch.from_numpy(ret.copy()).float().to(self.device)
         return ret
 
@@ -149,7 +152,7 @@ class Resample(nn.Module):
         self.device = device
 
     def forward(self, audio):
-        audio = resampy.resample(audio.numpy(), self.orig_sr, self.sr)
+        audio = resampy.resample(audio.detach().numpy(), self.orig_sr, self.sr)
         audio = resampy.resample(audio, self.sr, self.orig_sr)
         audio = torch.from_numpy(audio).float().to(self.device)
         return audio
@@ -172,7 +175,7 @@ class Mp3Compress(nn.Module):
         self.device = device
 
     def forward(self, audio):
-        write("tmp.wav", self.sr, audio.numpy())
+        write("tmp.wav", self.sr, audio.detach().numpy())
         wav_segment = pydub.AudioSegment.from_wav("tmp.wav")
         wav_segment.export(
             "tmp.mp3",
@@ -193,7 +196,7 @@ class TimeStretch(nn.Module):
 
     def forward(self, audio):
         l = len(audio)
-        audio_s_1 = librosa.effects.time_stretch(audio.numpy(), rate=self.tsr)
+        audio_s_1 = librosa.effects.time_stretch(audio.detach().numpy(), rate=self.tsr)
         l_s_1 = len(audio_s_1)
         tsr_r = l_s_1 / l + 0.00000001  # for sure that len(audio_s_2)>len(audio)
         audio_s_2 = librosa.effects.time_stretch(audio_s_1, rate=tsr_r)

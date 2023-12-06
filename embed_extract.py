@@ -26,18 +26,20 @@ ckpt_path = "/Users/pecholalee/Coding/Watermark/ideaw_data/save/ideaw.ckpt"
 audio_path = "/Users/pecholalee/Coding/Watermark/miniAWdata/p225_008.wav"
 output_path = "/Users/pecholalee/Coding/Watermark/ideaw_data/output/wmd_audio.wav"
 
+# device
+device = "cpu"
 
 if __name__ == "__main__":
     # build model and load trained parameters
-    ideaw = IDEAW(config_model_path)
+    ideaw = IDEAW(config_model_path, device)
     print("[IDEAW]model built")
 
     ideaw.load_state_dict(torch.load(ckpt_path))
     print("[IDEAW]model loaded")
 
     # generate msg and lcode
-    watermark_msg = torch.randint(0, 2, (1, msg_bit), dtype=torch.float)
-    locate_code = torch.randint(0, 2, (1, lcode_bit), dtype=torch.float)
+    watermark_msg = torch.randint(0, 2, (1, msg_bit), dtype=torch.float32)
+    locate_code = torch.randint(0, 2, (1, lcode_bit), dtype=torch.float32)
 
     # EMBEDDING
     chunk_wmd_list = []

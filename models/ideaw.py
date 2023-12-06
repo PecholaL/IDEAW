@@ -36,7 +36,7 @@ class IDEAW(nn.Module):
 
         else:  # robustness == True
             # robustness training
-            audio_att = self.attack_layer(audio_wmd2)
+            audio_att = self.attack_layer(audio_wmd2, audio)
             audio_att_stft = self.stft(audio_att)
             audio_att_stft = self.balance_block(audio_att_stft)
             mid_stft, lcode_extr = self.extract_lcode(audio_att_stft)

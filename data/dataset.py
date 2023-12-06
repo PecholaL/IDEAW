@@ -14,7 +14,7 @@ class CollateFn(object):
         pass
 
     def __call__(self, batch):
-        tensor = torch.from_numpy(numpy.array(batch))
+        tensor = torch.from_numpy(numpy.array(batch)).float()
         return tensor
 
 
