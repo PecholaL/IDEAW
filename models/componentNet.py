@@ -7,6 +7,8 @@
 import torch.nn as nn
 import yaml
 
+from models.dense import DenseBlock
+
 
 class Discriminator(nn.Module):
     def __init__(self, config_path):
@@ -34,10 +36,14 @@ class BalanceBlock(nn.Module):
     def __init__(self, config_path):
         super(BalanceBlock, self).__init__()
         self.load_config(config_path)
+        self.channel = self.config["BalanceBlock"]["channel"]
+        self.net = DenseBlock(self.channel, self.channel)
 
-    def forward(self, data):
-        pass
+    def forward(self, data):  # i.e. audio_wmd2_stft undergone attLayer
+        # orig shape [B,F,T,C]
+        data = data.permute(0, 3, 2, 1)  # [B, C, T, F]
+        return self.net(data).permute(0, 3, 2, 1)
 
     def load_config(self, config_path):
         with open(config_path) as f:
-            config = yaml.load(f, Loader=yaml.FullLoader)
+            self.config = yaml.load(f, Loader=yaml.FullLoader)

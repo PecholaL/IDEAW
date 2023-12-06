@@ -43,5 +43,5 @@ AttackLayer:
     rate: 0.98
 
 BalanceBlock:
-  input_size:
-  output_size:
+  channel: 2
+  

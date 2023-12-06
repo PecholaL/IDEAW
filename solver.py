@@ -176,7 +176,7 @@ class Solver(object):
                 lcode_extr,
                 orig_output,
                 wmd_output,
-            ) = self.model(host_audio, watermark_msg, locate_code)
+            ) = self.model(host_audio, watermark_msg, locate_code, True)
 
             # loss
             ## percept. loss
@@ -208,7 +208,7 @@ class Solver(object):
             self.optim_I.zero_grad()
             self.optim_II.zero_grad()
 
-            # log
+            # logging
             print(
                 f"[IDEAW]:[{iter+1}/{n_iterations}]",
                 f"loss_percept={percept_loss.item():.6f}",

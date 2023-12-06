@@ -46,6 +46,7 @@ class AttackLayer(nn.Module):
     """
 
     def forward(self, audio_batch):
+        # orig shape [B, L]
         batch_size = audio_batch.shape[0]
         att_audio_list = []
         for i in range(batch_size):

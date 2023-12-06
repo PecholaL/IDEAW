@@ -22,15 +22,25 @@ class IDEAW(nn.Module):
         self.lcode_fc = nn.Linear(self.num_lc_bit, self.num_point)
         self.lcode_fc_back = nn.Linear(self.num_point, self.num_lc_bit)
         self.discriminator = Discriminator(config_path)
-        # self.attack_layer = AttackLayer(config_path)
-        # self.balance_block = BalanceBlock(config_path)
+        self.attack_layer = AttackLayer(config_path)
+        self.balance_block = BalanceBlock(config_path)
 
-    def forward(self, audio, msg, lcode):
+    def forward(self, audio, msg, lcode, robustness):
         audio_wmd1, audio_wmd1_stft = self.embed_msg(audio, msg)
         msg_extr1 = self.extract_msg(audio_wmd1_stft)
         audio_wmd2, audio_wmd2_stft = self.embed_lcode(audio_wmd1_stft, lcode)
-        mid_stft, lcode_extr = self.extract_lcode(audio_wmd2_stft)
-        msg_extr2 = self.extract_msg(mid_stft)
+
+        if robustness == False:
+            mid_stft, lcode_extr = self.extract_lcode(audio_wmd2_stft)
+            msg_extr2 = self.extract_msg(mid_stft)
+
+        else:  # robustness == True
+            # robustness training
+            audio_att = self.attack_layer(audio_wmd2)
+            audio_att_stft = self.stft(audio_att)
+            audio_att_stft = self.balance_block(audio_att_stft)
+            mid_stft, lcode_extr = self.extract_lcode(audio_att_stft)
+            msg_extr2 = self.extract_msg(mid_stft)
 
         orig_output = self.discriminator(audio)
         wmd_output = self.discriminator(audio_wmd2)
