@@ -11,11 +11,11 @@
     * ...
 """
 
-import io
 import librosa
 import math
 import numpy
 import pydub
+import random
 import resampy
 import torch
 import torch.nn as nn
@@ -29,17 +29,47 @@ class AttackLayer(nn.Module):
     def __init__(self, config_path, device):
         super(AttackLayer, self).__init__()
         self.load_config(config_path)
+        self.att_num = self.config["AttackLayer"]["att_num"]
         self.gaussianNoise = GaussianNoise(self.config, device)
         self.bandpass = Bandpass(self.config, device)
+        self.erase = Erase(self.config, device)
         self.dropout = Dropout(self.config, device)
         self.resample = Resample(self.config, device)
         self.ampMdf = AmplitudeModify(self.config)
         self.mp3compress = Mp3Compress(self.config, device)
         self.timeStretch = TimeStretch(self.config, device)
-        self.
+
+    """ Attack layer strategy:
+        Each attack is sample-wise. 
+        During training, the attack is randomly selected and 
+        applied to EACH sample in the batch.
+    """
 
     def forward(self, audio_batch):
-        pass
+        batch_size = audio_batch.shape[0]
+        att_audio_list = []
+        for i in range(batch_size):
+            audio = audio_batch[i].squeeze()
+            att_index = random.randint(1, self.att_num)
+            if att_index == 1:
+                att_audio = self.gaussianNoise(audio)
+            elif att_index == 2:
+                att_audio = self.bandpass(audio)
+            elif att_index == 3:
+                att_audio = self.erase(audio)
+            elif att_index == 4:
+                att_audio = self.dropout(audio)
+            elif att_index == 5:
+                att_audio = self.resample(audio)
+            elif att_index == 6:
+                att_audio = self.ampMdf(audio)
+            elif att_index == 7:
+                att_audio = self.mp3compress(audio)
+            else:  # elif att_index == 8:
+                att_audio = self.timeStretch(audio)
+            att_audio_list.append(att_audio)
+        ret = torch.stack(att_audio_list)
+        return ret
 
     def load_config(self, config_path):
         with open(config_path) as f:
@@ -81,6 +111,19 @@ class Bandpass(nn.Module):
         ret = signal.filtfilt(self.b, self.a, audio)
         ret = torch.from_numpy(ret.copy()).float().to(self.device)
         return ret
+
+
+class Erase(nn.Module):
+    def __init__(self, opt, device):
+        super(Erase, self).__init__()
+        self.p = opt["AttackLayer"]["Erase"]["p"]
+        self.device = device
+
+    def forward(self, audio):
+        mask = numpy.random.choice([0.0, 1.0], len(audio), p=[self.p, 1 - self.p])
+        mask_tensor = torch.tensor(mask, device=audio.device, dtype=torch.float32)
+        ret = audio * mask_tensor
+        return ret.to(self.device)
 
 
 class Dropout(nn.Module):

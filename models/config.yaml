@@ -22,14 +22,17 @@ Discriminator:
 Restorer:
 
 AttackLayer:
+  att_num: 8
   GaussianNoise:
     snr: 15
   Bandpass:
     sr: 16000
     upper: 5000
     lower: 1000
-  Dropout:
+  Erase:
     p: 0.05
+  Dropout:
+    p: 0.10
   Resample:
     orig_sr: 16000
     sr: 14400
