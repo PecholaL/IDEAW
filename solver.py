@@ -72,23 +72,29 @@ class Solver(object):
         param_discr = list(
             filter(lambda p: p.requires_grad, self.model.discriminator.parameters())
         )
-        # param_att =
+        param_att = list(
+            filter(lambda p: p.requires_grad, self.model.attack_layer.parameters())
+        )
+        param_balance = list(
+            lambda p: p.requires_grad, self.model.balance_block.parameters()
+        )
+
         lr1 = eval(self.config_t["train"]["lr1"])
         lr2 = eval(self.config_t["train"]["lr2"])
-        # lr3 = eval(self.config_t["train"]["lr3"])
         beta1 = self.config_t["train"]["beta1"]
         beta2 = self.config_t["train"]["beta2"]
         eps = eval(self.config_t["train"]["eps"])
         weight_decay = eval(self.config_t["train"]["weight_decay"])
-        self.optim_inn = torch.optim.Adam(
-            param_hinet1 + param_hinet2,
+
+        self.optim_stage_I = torch.optim.Adam(
+            param_hinet1 + param_hinet2 + param_discr,
             lr=lr1,
             betas=(beta1, beta2),
             eps=eps,
             weight_decay=weight_decay,
         )
-        self.optim_discr = torch.optim.Adam(
-            param_discr,
+        self.optim_II = torch.optim.Adam(
+            param_att+,
             lr=lr2,
             betas=(beta1, beta2),
             eps=eps,

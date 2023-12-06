@@ -1,7 +1,7 @@
 """ Other components of IDEAW
     configuration is located at IDEAW/models/config.yaml
     * Discirminator
-    * Restorer
+    * BalanceBlock
 """
 
 import torch
@@ -31,10 +31,13 @@ class Discriminator(nn.Module):
             self.config = yaml.load(f, Loader=yaml.FullLoader)
 
 
-class Restorer(nn.Module):
+class BalanceBlock(nn.Module):
     def __init__(self, config_path):
-        super(Restorer, self).__init__()
+        super(BalanceBlock, self).__init__()
         self.load_config(config_path)
+
+    def forward(self, data):
+        pass
 
     def load_config(self, config_path):
         with open(config_path) as f:

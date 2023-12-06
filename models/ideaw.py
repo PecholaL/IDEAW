@@ -7,7 +7,8 @@ import torch.nn as nn
 import yaml
 
 from models.mihnet import Mihnet_s1, Mihnet_s2
-from models.componentNet import Discriminator
+from models.componentNet import Discriminator, BalanceBlock
+from models.attackLayer import AttackLayer
 
 
 class IDEAW(nn.Module):
@@ -21,6 +22,8 @@ class IDEAW(nn.Module):
         self.lcode_fc = nn.Linear(self.num_lc_bit, self.num_point)
         self.lcode_fc_back = nn.Linear(self.num_point, self.num_lc_bit)
         self.discriminator = Discriminator(config_path)
+        # self.attack_layer = AttackLayer(config_path)
+        # self.balance_block = BalanceBlock(config_path)
 
     def forward(self, audio, msg, lcode):
         audio_wmd1, audio_wmd1_stft = self.embed_msg(audio, msg)

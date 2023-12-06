@@ -19,8 +19,6 @@ InnBlock:
 Discriminator:
   input_size: 16000
 
-Restorer:
-
 AttackLayer:
   att_num: 8
   GaussianNoise:
@@ -43,3 +41,7 @@ AttackLayer:
     bitrate: "192k"
   TimeStretch:
     rate: 0.98
+
+BalanceBlock:
+  input_size:
+  output_size:
