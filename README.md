@@ -34,6 +34,9 @@ Note that all the configurations of the model are located in *./models/config.ya
 *embed_extract.py* provides the embedding and extracting processes of audio watermark via the trained **IDEAW**.
 
 ### Customizing Attack
-The attack types in attackLayer can be customized in *./models/attackLayer.py* to enhance the specific robustness of **IDEAW**.
+The attack types in attackLayer can be customized in *./models/attackLayer.py* to enhance the specific robustness of **IDEAW**. The factors of attacks are in *./models/config.yaml*["AttackLayer"]
+The code provides 8 types of common attacks on audio, including Gaussian additive noise, bandpass filter, mpeg3 compression, *etc*.
+Remember to modify the configuration if more attacks are included: 
+*./models/config.yaml*["AttackLayer"]["att_num"].
 
 ### Thanks
