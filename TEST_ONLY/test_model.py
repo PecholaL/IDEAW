@@ -9,6 +9,7 @@ from models.ideaw import IDEAW
 from data.dataset import AWdataset, get_data_loader, infinite_iter
 
 IDEAW = IDEAW("../models/config.yaml", "cpu")
+print(f"toral parameter count: {sum(x.numel() for x in IDEAW.parameters())}")
 
 # prepare data
 dataset = AWdataset("../../Watermark/miniAWdata_pickle/audio.pkl")

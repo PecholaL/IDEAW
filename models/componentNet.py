@@ -41,10 +41,10 @@ class BalanceBlock(nn.Module):
 
     def forward(self, data):  # i.e. audio_wmd2_stft undergone attLayer
         # orig shape [B,F,T,C]
-        print(f"[TEST-BalanceBlock]input shape:{data.shape}")
+        # print(f"[TEST-BalanceBlock]input shape:{data.shape}")
         data = data.permute(0, 3, 2, 1)  # [B, C, T, F]
         ret = self.net(data).permute(0, 3, 2, 1)
-        print(f"[TEST-BalanceBlock]output shape:{ret.shape}")
+        # print(f"[TEST-BalanceBlock]output shape:{ret.shape}")
         return ret
 
     def load_config(self, config_path):

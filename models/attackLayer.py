@@ -72,7 +72,6 @@ class AttackLayer(nn.Module):
                 att_audio = self.timeStretch(audio)
             att_audio_list.append(att_audio)
         ret = torch.stack(att_audio_list)
-        print("attatttatatatat")
         return ret
 
     def load_config(self, config_path):
