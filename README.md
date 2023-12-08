@@ -29,6 +29,7 @@ Note that all the configurations of the model are located in *./models/config.ya
 1. **(\*)** Modify the training configuration *./config.yaml* and the paths of the related configurations and dataset in *./train.sh*.
 2. **(\*)** Train the model:
    `./train.sh`
+By default, the two stages of training each account for half of the iterations.
 
 ### Embedding and Extraction
 *embed_extract.py* provides the embedding and extracting processes of audio watermark via the trained **IDEAW**.
