@@ -12,7 +12,7 @@ if __name__ == "__main__":
     parser.add_argument("--train_config", default="config.yaml")
     parser.add_argument("--model_config", default="./model/config.yaml")
     parser.add_argument("--data_config", default="./data/config.yaml")
-    parser.add_argument("--device", default="cpu")
+    parser.add_argument("--device", default="cuda")
     parser.add_argument("--pickle_path")
     parser.add_argument("--load_model", action="store_true")
     parser.add_argument("--load_opt", action="store_true")

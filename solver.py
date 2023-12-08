@@ -10,11 +10,11 @@ from models.ideaw import IDEAW
 
 
 class Solver(object):
-    def __init__(self, config_data_path, config_model_path, device, args):
+    def __init__(self, config_data_path, config_model_path, args):
         self.config_data_path = config_data_path
         self.config_model_path = config_model_path
-        self.device = device
         self.args = args  # training config inside
+        self.device = self.args.device
 
         with open(self.config_data_path) as f:
             self.config_data = yaml.load(f, Loader=yaml.FullLoader)
@@ -77,7 +77,7 @@ class Solver(object):
             filter(lambda p: p.requires_grad, self.model.attack_layer.parameters())
         )
         param_balance = list(
-            lambda p: p.requires_grad, self.model.balance_block.parameters()
+            filter(lambda p: p.requires_grad, self.model.balance_block.parameters())
         )
 
         lr1 = eval(self.config_t["train"]["lr1"])
@@ -87,7 +87,7 @@ class Solver(object):
         eps = eval(self.config_t["train"]["eps"])
         weight_decay = eval(self.config_t["train"]["weight_decay"])
 
-        self.optim_stage_I = torch.optim.Adam(
+        self.optim_I = torch.optim.Adam(
             param_hinet1 + param_hinet2 + param_discr,
             lr=lr1,
             betas=(beta1, beta2),
@@ -114,12 +114,33 @@ class Solver(object):
         print("[IDEAW]optimizers built")
 
     # autosave, called in training
-    def save_model(self):
-        torch.save(self.model.state_dict(), f"{self.args.store_model_path}ideaw.ckpt")
-        torch.save(self.optim_I.state_dict(), f"{self.args.store_model_path}optim1.opt")
-        torch.save(
-            self.optim_II.state_dict(), f"{self.args.store_model_path}optim2.opt"
-        )
+    def save_model(self, robustness):
+        if robustness:
+            torch.save(
+                self.model.state_dict(),
+                f"{self.args.store_model_path}stage_II/ideaw.ckpt",
+            )
+            torch.save(
+                self.optim_I.state_dict(),
+                f"{self.args.store_model_path}stage_II/optim1.opt",
+            )
+            torch.save(
+                self.optim_II.state_dict(),
+                f"{self.args.store_model_path}stage_II/optim2.opt",
+            )
+        else:
+            torch.save(
+                self.model.state_dict(),
+                f"{self.args.store_model_path}stage_I/ideaw.ckpt",
+            )
+            torch.save(
+                self.optim_I.state_dict(),
+                f"{self.args.store_model_path}stage_I/optim1.opt",
+            )
+            torch.save(
+                self.optim_II.state_dict(),
+                f"{self.args.store_model_path}stage_I/optim2.opt",
+            )
 
     # load trained model
     def load_model(self):
@@ -167,6 +188,12 @@ class Solver(object):
             wmd_label = self.cc(wmd_label)
 
             # forward
+            ## stage I training
+            if iter < n_iterations / 2:
+                robustness = False
+            ## stage II training (robustness training)
+            else:
+                robustness = True
             (
                 audio_wmd1,
                 _,
@@ -177,7 +204,7 @@ class Solver(object):
                 lcode_extr,
                 orig_output,
                 wmd_output,
-            ) = self.model(host_audio, watermark_msg, locate_code, True)
+            ) = self.model(host_audio, watermark_msg, locate_code, robustness)
 
             # loss
             ## percept. loss
@@ -224,6 +251,6 @@ class Solver(object):
 
             # autosave
             if (iter + 1) % self.args.save_steps == 0 or iter + 1 == n_iterations:
-                self.save_model()
+                self.save_model(robustness)
 
         return
