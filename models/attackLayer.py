@@ -151,7 +151,7 @@ class Resample(nn.Module):
         self.device = device
 
     def forward(self, audio):
-        audio = resampy.resample(audio.detach().numpy(), self.orig_sr, self.sr)
+        audio = resampy.resample(audio.cpu().detach().numpy(), self.orig_sr, self.sr)
         audio = resampy.resample(audio, self.sr, self.orig_sr)
         audio = torch.from_numpy(audio).float().to(self.device)
         return audio
@@ -195,7 +195,9 @@ class TimeStretch(nn.Module):
 
     def forward(self, audio):
         l = len(audio)
-        audio_s_1 = librosa.effects.time_stretch(audio.detach().numpy(), rate=self.tsr)
+        audio_s_1 = librosa.effects.time_stretch(
+            audio.cpu().detach().numpy(), rate=self.tsr
+        )
         l_s_1 = len(audio_s_1)
         tsr_r = l_s_1 / l + 0.00000001  # for sure that len(audio_s_2)>len(audio)
         audio_s_2 = librosa.effects.time_stretch(audio_s_1, rate=tsr_r)
