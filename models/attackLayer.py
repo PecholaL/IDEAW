@@ -111,7 +111,7 @@ class Bandpass(nn.Module):
         )
 
     def forward(self, audio):
-        ret = signal.filtfilt(self.b, self.a, audio.detach())
+        ret = signal.filtfilt(self.b, self.a, audio.cpu().detach())
         ret = torch.from_numpy(ret.copy()).float().to(self.device)
         return ret
 

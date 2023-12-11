@@ -66,5 +66,5 @@ att = AttackLayer("../models/config.yaml", "cpu")
 """ Test attack layer (processing batch)
 """
 batch = torch.rand(4, 18000)
-att_batch = att(batch)
+att_batch = att(batch, batch)
 print(att_batch.shape)
