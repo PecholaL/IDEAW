@@ -239,6 +239,7 @@ class Solver(object):
             # logging
             print(
                 f"[IDEAW]:[{iter+1}/{n_iterations}]",
+                f"Robustness={robustness}",
                 f"loss_percept={percept_loss.item():.6f}",
                 f"loss_integ={integ_loss.item():6f}",
                 f"loss_discr={discr_loss.item():6f}",
