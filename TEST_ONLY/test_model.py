@@ -57,9 +57,9 @@ print(f"msg&lcode shape: {msg.shape}&{lcode.shape}")
 
 # test the forward of IDEAW
 print("Input dtype:")
-print(data.dtype)
-print(msg.dtype)
-print(lcode.dtype)
+print("audio:", data.dtype)
+print("msg:", msg.dtype)
+print("lcode:", lcode.dtype)
 (
     audio_wmd1,
     audio_wmd1_stft,
@@ -74,12 +74,12 @@ print(lcode.dtype)
 
 
 print("Output shape:")
-print(audio_wmd1.shape)
-print(audio_wmd1_stft.shape)
-print(audio_wmd2.shape)
-print(audio_wmd2_stft.shape)
-print(msg_extr1.shape)
-print(msg_extr2.shape)
-print(lcode_extr.shape)
-print(orig_output.shape)
-print(wmd_output.shape)
+print("audio_wmd1: ", audio_wmd1.shape)
+print("audio_wmd1_stft: ", audio_wmd1_stft.shape)
+print("audio_wmd2:", audio_wmd2.shape)
+print("audio_wmd2_stft:", audio_wmd2_stft.shape)
+print("msg_extr1:", msg_extr1.shape)
+print("msg_extr2:", msg_extr2.shape)
+print("lcode_extr:", lcode_extr.shape)
+print("orig_output:", orig_output.shape)
+print("wmd_output:", wmd_output.shape)

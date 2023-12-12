@@ -19,8 +19,12 @@ class IDEAW(nn.Module):
         self.hinet_2 = Mihnet_s2(config_path, self.num_inn)  # for embedding lcode
         self.msg_fc = nn.Linear(self.num_bit, self.num_point)
         self.msg_fc_back = nn.Linear(self.num_point, self.num_bit)
-        self.lcode_fc = nn.Linear(self.num_lc_bit, self.num_point)
-        self.lcode_fc_back = nn.Linear(self.num_point, self.num_lc_bit)
+        self.lcode_fc = nn.Linear(
+            self.num_lc_bit, int(self.num_point / self.chunk_ratio)
+        )
+        self.lcode_fc_back = nn.Linear(
+            int(self.num_point / self.chunk_ratio), self.num_lc_bit
+        )
         self.discriminator = Discriminator(config_path)
         self.attack_layer = AttackLayer(config_path, device)
         self.balance_block = BalanceBlock(config_path)
@@ -28,10 +32,10 @@ class IDEAW(nn.Module):
     def forward(self, audio, msg, lcode, robustness):
         audio_wmd1, audio_wmd1_stft = self.embed_msg(audio, msg)
         msg_extr1 = self.extract_msg(audio_wmd1_stft)
-        audio_wmd2, audio_wmd2_stft = self.embed_lcode(audio_wmd1_stft, lcode)
+        audio_wmd2, audio_wmd2_stft = self.embed_lcode(audio_wmd1, lcode)
 
         if robustness == False:
-            mid_stft, lcode_extr = self.extract_lcode(audio_wmd2_stft)
+            mid_stft, lcode_extr = self.extract_lcode(audio_wmd2)
             msg_extr2 = self.extract_msg(mid_stft)
 
         else:  # robustness == True
@@ -39,7 +43,7 @@ class IDEAW(nn.Module):
             audio_att = self.attack_layer(audio_wmd2, audio)
             audio_att_stft = self.stft(audio_att)
             audio_att_stft = self.balance_block(audio_att_stft)
-            mid_stft, lcode_extr = self.extract_lcode(audio_att_stft)
+            mid_stft, lcode_extr = self.extract_lcode(audio_att)
             msg_extr2 = self.extract_msg(mid_stft)
 
         orig_output = self.discriminator(audio)
@@ -67,6 +71,7 @@ class IDEAW(nn.Module):
             self.num_bit = config["IDEAW"]["num_bit"]
             self.num_lc_bit = config["IDEAW"]["num_lc_bit"]
             self.num_point = config["IDEAW"]["num_point"]
+            self.chunk_ratio = config["IDEAW"]["chunk_ratio"]
 
     def stft(self, data):
         window = torch.hann_window(self.win_len).to(data.device)
@@ -116,21 +121,33 @@ class IDEAW(nn.Module):
         return audio_stft_.permute(0, 3, 2, 1), msg_stft_.permute(0, 3, 2, 1)
 
     # INN#2 Embedding & Extracting watermark locating code
-    def embed_lcode(self, audio_stft, lcode):
+    def embed_lcode(self, audio, lcode):
         lcode_expand = self.lcode_fc(lcode)
         lcode_stft = self.stft(lcode_expand)
-        wm_audio_stft, _ = self.enc_dec_2(audio_stft, lcode_stft, rev=False)
-        wm_audio = self.istft(wm_audio_stft)
+        # l_code will be embedded into the head of the audio
+        audio_1_stft = self.stft(audio[:, : int(self.num_point / self.chunk_ratio)])
+        audio_2 = audio[:, int(self.num_point / self.chunk_ratio) :]
+        wm_audio_1_stft, _ = self.enc_dec_2(audio_1_stft, lcode_stft, rev=False)
+        wm_audio_1 = self.istft(wm_audio_1_stft)
+        wm_audio = torch.concat([wm_audio_1, audio_2], dim=1)
+        wm_audio_stft = self.stft(wm_audio)
 
         return wm_audio, wm_audio_stft
 
-    def extract_lcode(self, wm_audio_stft):
-        aux_signal_stft = wm_audio_stft
+    def extract_lcode(self, wm_audio):
+        wm_audio_1_stft = self.stft(
+            wm_audio[:, : int(self.num_point / self.chunk_ratio)]
+        )
+        wm_audio_2 = wm_audio[:, int(self.num_point / self.chunk_ratio) :]
+        aux_signal_stft = wm_audio_1_stft
         mid_stft, extr_lcode_expand_stft = self.enc_dec_2(
-            wm_audio_stft, aux_signal_stft, rev=True
+            wm_audio_1_stft, aux_signal_stft, rev=True
         )
         extr_lcode_expand = self.istft(extr_lcode_expand_stft)
         extr_lcode = self.lcode_fc_back(extr_lcode_expand).clamp(-1, 1)
+        mid_1 = self.istft(mid_stft)
+        mid = torch.concat([mid_1, wm_audio_2], dim=1)
+        mid_stft = self.stft(mid)
         return mid_stft, extr_lcode
 
     def enc_dec_2(self, audio_stft, lcode_stft, rev):

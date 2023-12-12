@@ -10,6 +10,7 @@ IDEAW:
   num_bit: 16
   num_lc_bit: 10
   num_point: 16000
+  chunk_ratio: 4
 
 ## for invertible block
 InnBlock:
