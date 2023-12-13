@@ -31,13 +31,14 @@ Note that all the configurations of the model are located in *./models/config.ya
    `./train.sh`
 By default, the two stages of training each account for half of the iterations.
 
-### Embedding and Extraction
+## Embedding and Extraction
 *embed_extract.py* provides the embedding and extracting processes of audio watermark via the trained **IDEAW**.
+Note that if you have used the DataParallel version of *solver.py* to train **IDEAW**, please use the DataParallel version of *embed_extract.py* to test the trained model. *embed_extract.py* showcases how to use **IDEAW** for watermark embedding and extraction. For simplicity, hard coding is used, and the trained **IDEAW** can be encapsulated based on the provided approach.
 
-### Customizing Attack
+## Customizing Attack
 The attack types in attackLayer can be customized in *./models/attackLayer.py* to enhance the specific robustness of **IDEAW**. The factors of attacks are in *./models/config.yaml*["AttackLayer"]
 The code provides 8 types of common attacks on audio, including Gaussian additive noise, bandpass filter, mpeg3 compression, *etc*.
 Remember to modify the configuration if more attacks are included: 
 *./models/config.yaml*["AttackLayer"]["att_num"].
 
-### Thanks
+## Thanks
