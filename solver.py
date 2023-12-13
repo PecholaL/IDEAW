@@ -7,6 +7,7 @@ import yaml
 
 from data.dataset import AWdataset, get_data_loader, infinite_iter
 from models.ideaw import IDEAW
+from metrics import calc_acc
 
 
 class Solver(object):
@@ -226,6 +227,10 @@ class Solver(object):
             ## total loss
             total_loss = percept_loss + integ_loss + discr_loss
 
+            # metric
+            acc_msg = calc_acc(msg_extr2, watermark_msg, 0.5)
+            acc_lcode = calc_acc(lcode_extr, locate_code, 0.5)
+
             # backward
             total_loss.backward()
 
@@ -243,6 +248,8 @@ class Solver(object):
                 f"loss_percept={percept_loss.item():.6f}",
                 f"loss_integ={integ_loss.item():6f}",
                 f"loss_discr={discr_loss.item():6f}",
+                f"acc_msg={acc_msg:4f}",
+                f"acc_lcode={acc_lcode:4f}",
                 end="\r",
             )
 
