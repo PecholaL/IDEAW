@@ -111,6 +111,7 @@ class IDEAW(nn.Module):
         _, extr_msg_expand_stft = self.enc_dec_1(wm_mid_stft, aux_signal_stft, rev=True)
         extr_msg_expand = self.istft(extr_msg_expand_stft)
         extr_msg = self.msg_fc_back(extr_msg_expand).clamp(-1, 1)
+
         return extr_msg
 
     def enc_dec_1(self, audio_stft, msg_stft, rev):
@@ -149,6 +150,7 @@ class IDEAW(nn.Module):
         mid_1 = self.istft(mid_stft)
         mid = torch.concat([mid_1, wm_audio_2], dim=1)
         mid_stft = self.stft(mid)
+
         return mid_stft, extr_lcode
 
     def enc_dec_2(self, audio_stft, lcode_stft, rev):

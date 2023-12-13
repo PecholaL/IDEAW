@@ -6,10 +6,9 @@
 import os
 import pickle
 import random
-import sys
 import yaml
 
-from utils import *
+from data.utils import *
 
 
 if __name__ == "__main__":

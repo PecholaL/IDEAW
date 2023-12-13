@@ -20,7 +20,7 @@ lcode_bit = 10
 
 # config paths
 config_model_path = "/Users/pecholalee/Coding/IDEAW/models/config.yaml"
-ckpt_path = "/Users/pecholalee/Coding/Watermark/ideaw_data/save/ideaw.ckpt"
+ckpt_path = "/Users/pecholalee/Coding/Watermark/ideaw_data/save/stage_I/ideaw.ckpt"
 
 # audio path
 audio_path = "/Users/pecholalee/Coding/Watermark/miniAWdata/p225_008.wav"
@@ -74,17 +74,17 @@ if __name__ == "__main__":
 
                 # embed msg/lcode
                 audio_wmd1, audio_wmd1_stft = ideaw.embed_msg(chunk, watermark_msg)
-                audio_wmd2, _ = ideaw.embed_lcode(audio_wmd1_stft, locate_code)
+                audio_wmd2, _ = ideaw.embed_lcode(audio_wmd1, locate_code)
 
                 # concat watermarked chunk
-                chunk_wmd = audio_wmd2.squeeze().cpu().numpy().astype("int16")
-                chunk_rest = chunk_rest.squeeze().cpu().numpy().astype("int16")
+                chunk_wmd = audio_wmd2.squeeze().cpu().numpy()
+                chunk_rest = chunk_rest.squeeze().cpu().numpy()
 
                 chunk_wmd_list.append(chunk_wmd)
                 chunk_wmd_list.append(chunk_rest)
 
         audio_rest = audio[:, end_pos:]
-        audio_rest = audio_rest.squeeze().cpu().numpy().astype("int16")
+        audio_rest = audio_rest.squeeze().cpu().numpy()
         chunk_wmd_list.append(audio_rest)
         end_time = time.time()
         embed_time_cost = end_time - start_time
@@ -123,11 +123,9 @@ if __name__ == "__main__":
         for i in it:
             start_pos = i * chunk_size
             chunk = audio[:, start_pos : int(start_pos + chunk_size / 1.5)]
-            chunk_stft = ideaw.stft(chunk)
 
             # extract lcode/msg
-            chunk_stft = ideaw.stft(chunk)
-            mid_stft, extract_lcode = ideaw.extract_lcode(chunk_stft)
+            mid_stft, extract_lcode = ideaw.extract_lcode(chunk)
             extract_msg = ideaw.extract_msg(mid_stft)
 
             extract_lcode = extract_lcode >= 0.5
@@ -137,8 +135,8 @@ if __name__ == "__main__":
             acc_lcode = calc_acc(extract_lcode, locate_code, 0.5)
             acc_msg = calc_acc(extract_msg, watermark_msg, 0.5)
 
-            acc_lcode_list.append(acc_lcode)
-            acc_msg_list.append(acc_msg)
+            acc_lcode_list.append(acc_lcode.cpu())
+            acc_msg_list.append(acc_msg.cpu())
 
         end_time = time.time()
         extract_time_cost = end_time - start_time
