@@ -8,11 +8,15 @@ import numpy
 import time
 import torch
 import tqdm
+import warnings
+
 from scipy.io.wavfile import write
 
 from models.ideaw import IDEAW
 from data.process import read_resample
-from metrics import calc_acc
+from metrics import calc_acc, signal_noise_ratio
+
+warnings.filterwarnings("ignore")
 
 # mini config
 msg_bit = 16
@@ -34,12 +38,20 @@ if __name__ == "__main__":
     ideaw = IDEAW(config_model_path, device)
     print("[IDEAW]model built")
 
-    ideaw.load_state_dict(torch.load(ckpt_path))
+    ideaw.load_state_dict(torch.load(ckpt_path), strict=False)
     print("[IDEAW]model loaded")
 
     # generate msg and lcode
     watermark_msg = torch.randint(0, 2, (1, msg_bit), dtype=torch.float32)
     locate_code = torch.randint(0, 2, (1, lcode_bit), dtype=torch.float32)
+
+    print(
+        """
+#############################################
+#####               IDEAW               #####
+#############################################
+          """
+    )
 
     # EMBEDDING
     chunk_wmd_list = []
@@ -93,10 +105,12 @@ if __name__ == "__main__":
     audio_wmd = numpy.concatenate(chunk_wmd_list)
     write(output_path, 16000, audio_wmd)
 
-    print(
-        f"[IDEAW]audio length: {audio_length}, \
-        embedding time cost: {embed_time_cost}"
-    )
+    # calculate SNR
+    SNR = signal_noise_ratio(audio_wmd, audio.squeeze().numpy())
+
+    print(f"[IDEAW]audio length: {audio_length}")
+    print(f"[IDEAW]embedding time cost: {embed_time_cost}s")
+    print(f"[IDEAW]SNR: {SNR:4f}")
 
     # EXTRACTION
     # extract and compute acc (w/o random clip)
@@ -116,7 +130,6 @@ if __name__ == "__main__":
 
         chunk_size = int(16000 * (1 + 0.5))
         chunk_num = int(audio_length / chunk_size)
-        print(audio_length)
 
         it = range(chunk_num)
         it = tqdm.tqdm(it, desc="Extracting")
@@ -144,7 +157,5 @@ if __name__ == "__main__":
     acc_lcode_all = numpy.array(acc_lcode_list)
     acc_msg_all = numpy.array(acc_msg_list)
 
-    print(
-        f"[IDEAW]lcode/msg acc: {acc_lcode_all.mean()}/{acc_msg_all.mean()}, \
-        extraction time cost: {extract_time_cost}"
-    )
+    print(f"[IDEAW]lcode/msg acc: {acc_lcode_all.mean():4f}/{acc_msg_all.mean():4f}")
+    print(f"[IDEAW]extraction time cost: {extract_time_cost}s")

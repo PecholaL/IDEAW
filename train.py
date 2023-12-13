@@ -2,10 +2,12 @@
 """
 
 
-import yaml
+import warnings
 from argparse import ArgumentParser
 
 from solver import Solver
+
+warnings.filterwarnings("ignore")
 
 if __name__ == "__main__":
     parser = ArgumentParser()
