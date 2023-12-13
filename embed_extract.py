@@ -38,12 +38,12 @@ if __name__ == "__main__":
     ideaw = IDEAW(config_model_path, device)
     print("[IDEAW]model built")
 
-    ideaw.load_state_dict(torch.load(ckpt_path), strict=False)
+    ideaw.load_state_dict(torch.load(ckpt_path))
     print("[IDEAW]model loaded")
 
     # generate msg and lcode
-    watermark_msg = torch.randint(0, 2, (1, msg_bit), dtype=torch.float32)
-    locate_code = torch.randint(0, 2, (1, lcode_bit), dtype=torch.float32)
+    watermark_msg = torch.randint(0, 2, (1, msg_bit), dtype=torch.float32).to(device)
+    locate_code = torch.randint(0, 2, (1, lcode_bit), dtype=torch.float32).to(device)
 
     print(
         """
@@ -53,7 +53,8 @@ if __name__ == "__main__":
           """
     )
 
-    # EMBEDDING
+    """ EMBEDDING
+    """
     chunk_wmd_list = []
     # meta data
     embed_time_cost = 0
@@ -62,15 +63,16 @@ if __name__ == "__main__":
     with torch.no_grad():
         ideaw.eval()
 
-        start_time = time.time()
         audio, _, _ = read_resample(
             audio_path=audio_path, sr=16000, audio_limit_len=None
         )
         audio_length = len(audio)
-        audio = torch.tensor(audio).to(torch.float32).unsqueeze(0)
+        audio = torch.tensor(audio).to(torch.float32).unsqueeze(0).to(device)
 
-        chunk_size = int(16000 * (1 + 0.5))
-        chunk_num = int(audio_length / chunk_size)
+        start_time = time.time()
+        chunk_size = 16000
+        interval_size = 8000
+        chunk_num = int(audio_length / (chunk_size + interval_size))
         if chunk_num == 0:
             print("[IDEAW]ERROR, audio is too short.")
         else:
@@ -78,11 +80,11 @@ if __name__ == "__main__":
             it = tqdm.tqdm(it, desc="Embedding")
             end_pos = 0
             for i in it:
-                start_pos = i * chunk_size
-                end_wm_pos = int(start_pos + chunk_size / 1.5)
-                end_pos = (i + 1) * chunk_size
-                chunk = audio[:, start_pos:end_wm_pos]
-                chunk_rest = audio[:, end_wm_pos:end_pos]
+                start_pos = i * (chunk_size + interval_size)
+                wm_end_pos = start_pos + chunk_size
+                end_pos = start_pos + chunk_size + interval_size
+                chunk = audio[:, start_pos:wm_end_pos]
+                chunk_rest = audio[:, wm_end_pos:end_pos]
 
                 # embed msg/lcode
                 audio_wmd1, audio_wmd1_stft = ideaw.embed_msg(chunk, watermark_msg)
@@ -98,6 +100,7 @@ if __name__ == "__main__":
         audio_rest = audio[:, end_pos:]
         audio_rest = audio_rest.squeeze().cpu().numpy()
         chunk_wmd_list.append(audio_rest)
+
         end_time = time.time()
         embed_time_cost = end_time - start_time
 
@@ -112,7 +115,8 @@ if __name__ == "__main__":
     print(f"[IDEAW]embedding time cost: {embed_time_cost}s")
     print(f"[IDEAW]SNR: {SNR:4f}")
 
-    # EXTRACTION
+    """ EXTRACTION
+    """
     # extract and compute acc (w/o random clip)
     # meta data
     extract_time_cost = 0
@@ -121,28 +125,26 @@ if __name__ == "__main__":
     with torch.no_grad():
         ideaw.eval()
 
-        start_time = time.time()
         audio, _, _ = read_resample(
             audio_path=output_path, sr=16000, audio_limit_len=None
         )
         audio_length = len(audio)
         audio = torch.tensor(audio).to(torch.float32).unsqueeze(0)
 
-        chunk_size = int(16000 * (1 + 0.5))
-        chunk_num = int(audio_length / chunk_size)
+        start_time = time.time()
+        chunk_size = 16000
+        interval_size = 8000
+        chunk_num = int(audio_length / (chunk_size + interval_size))
 
         it = range(chunk_num)
         it = tqdm.tqdm(it, desc="Extracting")
         for i in it:
-            start_pos = i * chunk_size
-            chunk = audio[:, start_pos : int(start_pos + chunk_size / 1.5)]
+            start_pos = i * (chunk_size + interval_size)
+            chunk = audio[:, start_pos : start_pos + chunk_size]
 
             # extract lcode/msg
             mid_stft, extract_lcode = ideaw.extract_lcode(chunk)
             extract_msg = ideaw.extract_msg(mid_stft)
-
-            extract_lcode = extract_lcode >= 0.5
-            extract_msg = extract_msg >= 0.5
 
             # compute acc
             acc_lcode = calc_acc(extract_lcode, locate_code, 0.5)
