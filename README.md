@@ -14,10 +14,10 @@ Robust Neural Audio Watermarking with Invertible Dual-Embedding
    DataLoader provides data batch shaped [batch_size, sr * audio_limit_len] each time.
 
 ### Building Model
-**IDEAW** is composed of a MIHNET, a discriminator, a restorer and an attack layer.
+**IDEAW** is composed of MIHNETs, a discriminator, a balance block and an attack layer.
 These networks are defined in different .py files:
 1. *mihnet.py* defines the core multi-INN of **IDEAW**.
-2. *componentNet.py* defines the discriminator and the restorer.
+2. *componentNet.py* defines the discriminator and the balance block.
 3. *attackLayer.py* defines the attack simulate layer.
 
 The components of MIHNET, i.e. INN block is defined in *innBlock.py*.
