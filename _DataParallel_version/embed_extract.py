@@ -117,7 +117,7 @@ if __name__ == "__main__":
     write(output_path, 16000, audio_wmd)
 
     # calculate SNR
-    SNR = signal_noise_ratio(audio_wmd, audio.squeeze().numpy())
+    SNR = signal_noise_ratio(audio.squeeze().cpu().numpy(), audio_wmd)
 
     print(f"[IDEAW]audio length: {audio_length}")
     print(f"[IDEAW]embedding time cost: {embed_time_cost}s")
