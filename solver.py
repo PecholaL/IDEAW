@@ -211,7 +211,8 @@ class Solver(object):
             ## percept. loss
             percept_loss_1 = self.criterion_percept(host_audio, audio_wmd1)
             percept_loss_2 = self.criterion_percept(host_audio, audio_wmd2)
-            percept_loss = percept_loss_1 + percept_loss_2
+            percept_loss_3 = self.criterion_percept(audio_wmd1, audio_wmd2)
+            percept_loss = percept_loss_1 + percept_loss_2 + percept_loss_3
             percept_loss_history.append(percept_loss.item())
             ## integrity loss
             integ_loss_1 = self.criterion_integ(watermark_msg, msg_extr1)
