@@ -236,8 +236,10 @@ class Solver(object):
 
             if eval(self.config_t["train"]["optim1_step"]):
                 self.optim_I.step()
+                self.weight_scheduler1.step()
             if eval(self.config_t["train"]["optim2_step"]):
                 self.optim_II.step()
+                self.weight_scheduler2.step()
             self.optim_I.zero_grad()
             self.optim_II.zero_grad()
 
