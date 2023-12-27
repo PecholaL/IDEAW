@@ -197,9 +197,9 @@ class Solver(object):
                 robustness = True
             (
                 audio_wmd1,
-                _,
+                audio_wmd1_stft,
                 audio_wmd2,
-                _,
+                audio_wmd2_stft,
                 msg_extr1,
                 msg_extr2,
                 lcode_extr,
@@ -209,9 +209,10 @@ class Solver(object):
 
             # loss
             ## percept. loss
-            percept_loss_1 = self.criterion_percept(host_audio, audio_wmd1)
-            percept_loss_2 = self.criterion_percept(host_audio, audio_wmd2)
-            percept_loss_3 = self.criterion_percept(audio_wmd1, audio_wmd2)
+            host_audio_stft = self.model.stft(host_audio)
+            percept_loss_1 = self.criterion_percept(host_audio_stft, audio_wmd1_stft)
+            percept_loss_2 = self.criterion_percept(host_audio_stft, audio_wmd2_stft)
+            percept_loss_3 = self.criterion_percept(audio_wmd1_stft, audio_wmd2_stft)
             percept_loss = percept_loss_1 + percept_loss_2 + percept_loss_3
             percept_loss_history.append(percept_loss.item())
             ## integrity loss
