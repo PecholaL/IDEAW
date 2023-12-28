@@ -196,9 +196,9 @@ class Solver(object):
             else:
                 robustness = True
             (
-                audio_wmd1,
+                _,
                 audio_wmd1_stft,
-                audio_wmd2,
+                _,
                 audio_wmd2_stft,
                 msg_extr1,
                 msg_extr2,

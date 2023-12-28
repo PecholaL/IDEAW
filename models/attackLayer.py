@@ -51,8 +51,7 @@ class AttackLayer(nn.Module):
         att_audio_list = []
         for i in range(batch_size):
             audio = audio_batch[i].squeeze()
-            # att_index = random.randint(1, self.att_num)
-            att_index = 8
+            att_index = random.randint(1, self.att_num)
             if att_index == 1:
                 att_audio = self.gaussianNoise(audio)
             elif att_index == 2:

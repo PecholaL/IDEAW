@@ -210,10 +210,10 @@ class Solver(object):
             else:
                 robustness = True
             (
-                audio_wmd1,
                 _,
-                audio_wmd2,
                 _,
+                _,
+                audio_wmd2_stft,
                 msg_extr1,
                 msg_extr2,
                 lcode_extr,
@@ -223,9 +223,8 @@ class Solver(object):
 
             # loss
             ## percept. loss
-            percept_loss_1 = self.criterion_percept(host_audio, audio_wmd1)
-            percept_loss_2 = self.criterion_percept(host_audio, audio_wmd2)
-            percept_loss = percept_loss_1 + percept_loss_2
+            host_audio_stft = self.model.module.stft(host_audio)
+            percept_loss = self.criterion_percept(host_audio_stft, audio_wmd2_stft)
             percept_loss_history.append(percept_loss.item())
             ## integrity loss
             integ_loss_1 = self.criterion_integ(watermark_msg, msg_extr1)
