@@ -159,7 +159,7 @@ tmp*
 *.png
 
 # Test files
-_TEST_ONLY
+_TEST_ONLY/
 
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
