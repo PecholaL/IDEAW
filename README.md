@@ -37,7 +37,7 @@ Note that if you have used the DataParallel version of *solver.py* to train **ID
 
 ## Customizing Attack
 The attack types in attackLayer can be customized in *./models/attackLayer.py* to enhance the specific robustness of **IDEAW**. The factors of attacks are in *./models/config.yaml*["AttackLayer"]
-The code provides 8 types of common attacks on audio, including Gaussian additive noise, bandpass filter, mpeg3 compression, etc.
+The code provides 8 types of common attacks on audio, including Gaussian additive noise, lower-pass filter, mpeg3 compression, etc.
 Remember to modify the configuration if more attacks are included: 
 *./models/config.yaml*["AttackLayer"]["att_num"].
 
