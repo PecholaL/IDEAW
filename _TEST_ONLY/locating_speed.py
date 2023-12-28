@@ -23,7 +23,7 @@ device = "cpu"
 # data prepare
 position = int(input("Embedding position (seconds): "))
 virtual_length = position + 1
-virtual_data = torch.rand(virtual_length * 16000).unsqueeze(0)
+virtual_data = torch.rand(virtual_length * 16000).unsqueeze(0).to(device)
 
 # model prepare
 ideaw = IDEAW(config_model_path, device)
