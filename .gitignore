@@ -158,6 +158,9 @@ tmp*
 *.pdf
 *.png
 
+# Test files
+_TEST_ONLY
+
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
 #  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
