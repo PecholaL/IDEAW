@@ -12,6 +12,8 @@ IDEAW:
   num_lc_bit: 10
   num_point: 16000
   chunk_ratio: 4
+  ## LSATT
+  extract_stripe: 5
 
 ## for invertible block
 InnBlock:

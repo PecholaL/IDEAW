@@ -2,6 +2,7 @@
     * Embed & Extract functions
 """
 
+import random
 import torch
 import torch.nn as nn
 import yaml
@@ -29,10 +30,17 @@ class IDEAW(nn.Module):
         self.attack_layer = AttackLayer(config_path, device)
         self.balance_block = BalanceBlock(config_path)
 
-    def forward(self, audio, msg, lcode, robustness):
+    def forward(self, audio, msg, lcode, robustness, LSATT):
         audio_wmd1, audio_wmd1_stft = self.embed_msg(audio, msg)
         msg_extr1 = self.extract_msg(audio_wmd1_stft)
         audio_wmd2, audio_wmd2_stft = self.embed_lcode(audio_wmd1, lcode)
+
+        if LSATT == True:
+            host_audio_stft = self.stft(audio)
+            audio_wmd2_stft = self.LSATT(
+                host_audio_stft, audio_wmd2_stft, self.extract_stripe
+            )
+            audio_wmd2 = self.istft(audio_wmd2_stft)
 
         if robustness == False:
             mid_stft, lcode_extr = self.extract_lcode(audio_wmd2)
@@ -73,6 +81,7 @@ class IDEAW(nn.Module):
             self.num_lc_bit = config["IDEAW"]["num_lc_bit"]
             self.num_point = config["IDEAW"]["num_point"]
             self.chunk_ratio = config["IDEAW"]["chunk_ratio"]
+            self.extract_stripe = config["IDEAW"]["extract_stripe"]
 
     def stft(self, data):
         window = torch.hann_window(self.win_len).to(data.device)
@@ -121,6 +130,12 @@ class IDEAW(nn.Module):
         audio_stft_, msg_stft_ = self.hinet_1(audio_stft, msg_stft, rev)
 
         return audio_stft_.permute(0, 3, 2, 1), msg_stft_.permute(0, 3, 2, 1)
+
+    def LSATT(self, host_audio_stft, wmd_audio_stft, step_size):
+        X = random.randint(0, step_size)
+        for i in range(X):
+            wmd_audio_stft[:, :, i, :] = host_audio_stft[:, :, i, :]
+        return wmd_audio_stft
 
     # INN#2 Embedding & Extracting watermark locating code
     def embed_lcode(self, audio, lcode):

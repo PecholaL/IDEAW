@@ -13,4 +13,6 @@ train:
   gamma: 0.95
   optim1_step: "True"
   optim2_step: "True"
+  stage_I_ratio: 0.5
+  LSATT_start_ratio: 0.2
   

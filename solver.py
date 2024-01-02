@@ -38,6 +38,8 @@ class Solver(object):
         self.dataset = AWdataset(dataset_dir)
         self.batch_size = self.config_t["train"]["batch_size"]
         self.num_workers = self.config_t["train"]["num_workers"]
+        self.stage1_ratio = self.config_t["train"]["stage_I_ratio"]
+        self.lsatt_start_ratio = self.config_t["train"]["LSATT_start_ratio"]
         self.train_iter = infinite_iter(
             get_data_loader(
                 dataset=self.dataset,
@@ -190,11 +192,16 @@ class Solver(object):
 
             # forward
             ## stage I training
-            if iter < n_iterations / 2:
+            if iter < n_iterations * self.stage1_ratio:
                 robustness = False
             ## stage II training (robustness training)
             else:
                 robustness = True
+            ## locating stripe adaptive training strategy
+            if iter < n_iterations * self.lsatt_start_ratio:
+                LSATT = False
+            else:
+                LSATT = True
             (
                 _,
                 audio_wmd1_stft,
@@ -205,7 +212,7 @@ class Solver(object):
                 lcode_extr,
                 orig_output,
                 wmd_output,
-            ) = self.model(host_audio, watermark_msg, locate_code, robustness)
+            ) = self.model(host_audio, watermark_msg, locate_code, robustness, LSATT)
 
             # loss
             ## percept. loss
@@ -249,6 +256,7 @@ class Solver(object):
             print(
                 f"[IDEAW]:[{iter+1}/{n_iterations}]",
                 f"Robustness={robustness}",
+                f"LSATT={LSATT}",
                 f"loss_percept={percept_loss.item():.6f}",
                 f"loss_integ={integ_loss.item():6f}",
                 f"loss_discr={discr_loss.item():6f}",
