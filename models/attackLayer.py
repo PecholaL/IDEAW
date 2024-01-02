@@ -173,16 +173,16 @@ class Mp3Compress(nn.Module):
         self.device = device
 
     def forward(self, audio):
-        write("tmp.wav", self.sr, audio.detach().numpy())
-        wav_segment = pydub.AudioSegment.from_wav("tmp.wav")
+        write("./output/tmp.wav", self.sr, audio.detach().numpy())
+        wav_segment = pydub.AudioSegment.from_wav("./tmp/tmp.wav")
         wav_segment.export(
-            "tmp.mp3",
+            "./tmp/tmp.mp3",
             format="mp3",
             bitrate=self.bitrate,
         )
-        mp3_segment = pydub.AudioSegment.from_mp3("tmp.mp3")
-        mp3_segment.export("tmp.wav", format="wav")
-        wav, _ = librosa.load("tmp.wav", sr=self.sr)
+        mp3_segment = pydub.AudioSegment.from_mp3("./tmp/tmp.mp3")
+        mp3_segment.export("./tmp/tmp.wav", format="wav")
+        wav, _ = librosa.load("./tmp/tmp.wav", sr=self.sr)
         return torch.from_numpy(wav.copy()).float().to(self.device)
 
 
