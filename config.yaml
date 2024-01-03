@@ -2,6 +2,9 @@
 train:
   batch_size: 1
   num_workers: 0
+  lambda_integ: 10
+  lambda_percpet: 1
+  lambda_ident: 1
   lr1: 1e-5
   lr2: 1e-5
   lr3: 1e-5
@@ -14,5 +17,5 @@ train:
   optim1_step: "True"
   optim2_step: "True"
   stage_I_ratio: 0.5
-  LSATT_start_ratio: 0.2
+  shift_ratio: 0.2
   

@@ -39,7 +39,7 @@ class Solver(object):
         self.batch_size = self.config_t["train"]["batch_size"]
         self.num_workers = self.config_t["train"]["num_workers"]
         self.stage1_ratio = self.config_t["train"]["stage_I_ratio"]
-        self.lsatt_start_ratio = self.config_t["train"]["LSATT_start_ratio"]
+        self.shift_ratio = self.config_t["train"]["shift_ratio"]
         self.train_iter = infinite_iter(
             get_data_loader(
                 dataset=self.dataset,
@@ -166,6 +166,9 @@ class Solver(object):
     # training
     def train(self, n_iterations):
         print("[IDEAW]starting training...")
+        self.lambda_1 = self.config_t["train"]["lambda_integ"]
+        self.lambda_2 = self.config_t["train"]["lambda_percept"]
+        self.lambda_3 = self.config_t["train"]["lambda_ident"]
         percept_loss_history = []
         integ_loss_history = []
         discr_loss_history = []
@@ -198,10 +201,10 @@ class Solver(object):
             else:
                 robustness = True
             ## locating stripe adaptive training strategy
-            if iter < n_iterations * self.lsatt_start_ratio:
-                LSATT = False
+            if iter < n_iterations * self.shift_ratio:
+                shift = False
             else:
-                LSATT = True
+                shift = True
             (
                 _,
                 audio_wmd1_stft,
@@ -212,7 +215,7 @@ class Solver(object):
                 lcode_extr,
                 orig_output,
                 wmd_output,
-            ) = self.model(host_audio, watermark_msg, locate_code, robustness, LSATT)
+            ) = self.model(host_audio, watermark_msg, locate_code, robustness, shift)
 
             # loss
             ## percept. loss
@@ -234,7 +237,11 @@ class Solver(object):
             discr_loss = discr_loss_orig + discr_loss_wmd
             discr_loss_history.append(discr_loss.item())
             ## total loss
-            total_loss = percept_loss + integ_loss + discr_loss
+            total_loss = (
+                self.lambda_1 * integ_loss
+                + self.lambda_2 * percept_loss
+                + self.lambda_3 * discr_loss
+            )
 
             # metric
             acc_msg = calc_acc(msg_extr2, watermark_msg, 0.5)
@@ -256,7 +263,7 @@ class Solver(object):
             print(
                 f"[IDEAW]:[{iter+1}/{n_iterations}]",
                 f"Robustness={robustness}",
-                f"LSATT={LSATT}",
+                f"shift={shift}",
                 f"loss_percept={percept_loss.item():.6f}",
                 f"loss_integ={integ_loss.item():6f}",
                 f"loss_discr={discr_loss.item():6f}",

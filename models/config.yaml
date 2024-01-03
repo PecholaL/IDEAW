@@ -12,13 +12,16 @@ IDEAW:
   num_lc_bit: 10
   num_point: 16000
   chunk_ratio: 4
-  ## LSATT
+  ## locating step size
   extract_stripe: 5
 
 ## for invertible block
 InnBlock:
   channel: 2
   clamp: 2
+
+LClassifier:
+  input_size: 500
 
 Discriminator:
   input_size: 16000

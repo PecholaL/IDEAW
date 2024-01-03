@@ -30,14 +30,14 @@ class IDEAW(nn.Module):
         self.attack_layer = AttackLayer(config_path, device)
         self.balance_block = BalanceBlock(config_path)
 
-    def forward(self, audio, msg, lcode, robustness, LSATT):
+    def forward(self, audio, msg, lcode, robustness, shift):
         audio_wmd1, audio_wmd1_stft = self.embed_msg(audio, msg)
         msg_extr1 = self.extract_msg(audio_wmd1_stft)
         audio_wmd2, audio_wmd2_stft = self.embed_lcode(audio_wmd1, lcode)
 
-        if LSATT == True:
+        if shift == True:
             host_audio_stft = self.stft(audio)
-            audio_wmd2_stft = self.LSATT(
+            audio_wmd2_stft = self.shift(
                 host_audio_stft, audio_wmd2_stft, self.extract_stripe
             )
             audio_wmd2 = self.istft(audio_wmd2_stft)
@@ -131,7 +131,7 @@ class IDEAW(nn.Module):
 
         return audio_stft_.permute(0, 3, 2, 1), msg_stft_.permute(0, 3, 2, 1)
 
-    def LSATT(self, host_audio_stft, wmd_audio_stft, step_size):
+    def shift(self, host_audio_stft, wmd_audio_stft, step_size):
         X = random.randint(0, step_size)
         for i in range(X):
             wmd_audio_stft[:, :, i, :] = host_audio_stft[:, :, i, :]
