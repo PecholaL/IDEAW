@@ -17,7 +17,7 @@ class LClassifier(nn.Module):
             nn.ReLU(),
             nn.Linear(64, 32),
             nn.ReLU(),
-            nn.Linear(64, 32),
+            nn.Linear(32, 32),
             nn.ReLU(),
             nn.Linear(32, 1),
             nn.Sigmoid(),

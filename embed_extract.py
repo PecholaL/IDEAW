@@ -129,7 +129,7 @@ if __name__ == "__main__":
             audio_path=output_path, sr=16000, audio_limit_len=None
         )
         audio_length = len(audio)
-        audio = torch.tensor(audio).to(torch.float32).unsqueeze(0)
+        audio = torch.tensor(audio).to(torch.float32).unsqueeze(0).to(device)
 
         start_time = time.time()
         chunk_size = 16000
