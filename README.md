@@ -2,6 +2,7 @@
 Robust Neural Audio Watermarking with Invertible Dual-Embedding
 
 **☕️☕️☕️**
+[IDEAW home page](https://pecholal.github.io/IDEAW-demo/)
 
 ## Training IDEAW
 "**(\*)**" means **necessary** steps
