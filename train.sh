@@ -2,10 +2,10 @@ python3 train.py \
 --train_config /Users/pecholalee/Coding/IDEAW/config.yaml \
 --model_config /Users/pecholalee/Coding/IDEAW/models/config.yaml \
 --data_config /Users/pecholalee/Coding/IDEAW/data/config.yaml \
---device cpu \
+--device cuda \
 --pickle_path /Users/pecholalee/Coding/Watermark/miniAWdata_pickle/audio.pkl \
 --store_model_path /Users/pecholalee/Coding/Watermark/ideaw_data/save/ \
 --load_model_path /Users/pecholalee/Coding/Watermark/ideaw_data/save/stage_I/ \
---summary_steps 2 \
---save_steps 5 \
---iterations 10 \
+--summary_steps 1000 \
+--save_steps 10000 \
+--iterations 150000 \

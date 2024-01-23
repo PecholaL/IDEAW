@@ -7,7 +7,7 @@ import yaml
 
 from data.dataset import AWdataset, get_data_loader, infinite_iter
 from models.ideaw import IDEAW
-from metrics import calc_acc
+from metrics import calc_acc, signal_noise_ratio
 
 
 class Solver(object):
@@ -91,7 +91,7 @@ class Solver(object):
         weight_decay = eval(self.config_t["train"]["weight_decay"])
 
         self.optim_I = torch.optim.Adam(
-            param_hinet1 + param_hinet2 + param_discr,
+            param_hinet1 + param_hinet2,
             lr=lr1,
             betas=(beta1, beta2),
             eps=eps,
@@ -104,6 +104,13 @@ class Solver(object):
             eps=eps,
             weight_decay=weight_decay,
         )
+        self.optim_III = torch.optim.Adam(
+            param_discr,
+            lr=lr1,
+            betas=(beta1, beta2),
+            eps=eps,
+            weight_decay=weight_decay,
+        )
         self.weight_scheduler1 = torch.optim.lr_scheduler.StepLR(
             self.optim_I,
             self.config_t["train"]["weight_step"],
@@ -111,6 +118,11 @@ class Solver(object):
         )
         self.weight_scheduler2 = torch.optim.lr_scheduler.StepLR(
             self.optim_II,
+            self.config_t["train"]["weight_step"],
+            gamma=self.config_t["train"]["gamma"],
+        )
+        self.weight_scheduler3 = torch.optim.lr_scheduler.StepLR(
+            self.optim_III,
             self.config_t["train"]["weight_step"],
             gamma=self.config_t["train"]["gamma"],
         )
@@ -131,6 +143,10 @@ class Solver(object):
                 self.optim_II.state_dict(),
                 f"{self.args.store_model_path}stage_II/optim2.opt",
             )
+            torch.save(
+                self.optim_III.state_dict(),
+                f"{self.args.store_model_path}stage_II/optim3.opt",
+            )
         else:
             torch.save(
                 self.model.state_dict(),
@@ -144,6 +160,10 @@ class Solver(object):
                 self.optim_II.state_dict(),
                 f"{self.args.store_model_path}stage_I/optim2.opt",
             )
+            torch.save(
+                self.optim_III.state_dict(),
+                f"{self.args.store_model_path}stage_I/optim3.opt",
+            )
 
     # load trained model
     def load_model(self):
@@ -154,6 +174,9 @@ class Solver(object):
         )
         self.optim_II.load_state_dict(
             torch.load(f"{self.args.load_model_path}optim2.opt")
+        )
+        self.optim_III.load_state_dict(
+            torch.load(f"{self.args.load_model_path}optim3.opt")
         )
         return
 
@@ -172,6 +195,7 @@ class Solver(object):
         percept_loss_history = []
         integ_loss_history = []
         discr_loss_history = []
+        ident_loss_history = []
         for iter in range(n_iterations):
             # get data for current iteration
             host_audio = next(self.train_iter).to(torch.float32)
@@ -208,7 +232,7 @@ class Solver(object):
             (
                 _,
                 audio_wmd1_stft,
-                _,
+                audio_wmd2,
                 audio_wmd2_stft,
                 msg_extr1,
                 msg_extr2,
@@ -236,16 +260,30 @@ class Solver(object):
             discr_loss_wmd = self.criterion_discr(wmd_output, wmd_label)
             discr_loss = discr_loss_orig + discr_loss_wmd
             discr_loss_history.append(discr_loss.item())
+            ## identify loss
+            ident_loss = -torch.sum(torch.log(1 - wmd_output))
+            ident_loss_history.append(ident_loss)
             ## total loss
-            total_loss = (
-                self.lambda_1 * integ_loss
-                + self.lambda_2 * percept_loss
-                + self.lambda_3 * discr_loss
-            )
+            discr_frozen = True
+            if iter % 2 == 1:
+                discr_frozen = False
+                total_loss = (
+                    self.lambda_1 * integ_loss
+                    + self.lambda_2 * percept_loss
+                    + self.lambda_3 * discr_loss
+                )
+            else:
+                discr_frozen = True
+                total_loss = (
+                    self.lambda_1 * integ_loss
+                    + self.lambda_2 * percept_loss
+                    + self.lambda_3 * ident_loss
+                )
 
             # metric
             acc_msg = calc_acc(msg_extr2, watermark_msg, 0.5)
             acc_lcode = calc_acc(lcode_extr, locate_code, 0.5)
+            snr = signal_noise_ratio(host_audio, audio_wmd2)
 
             # backward
             total_loss.backward()
@@ -256,8 +294,12 @@ class Solver(object):
             if eval(self.config_t["train"]["optim2_step"]):
                 self.optim_II.step()
                 self.weight_scheduler2.step()
+            if discr_frozen == False:
+                self.optim_III.step()
+                self.weight_scheduler3.step()
             self.optim_I.zero_grad()
             self.optim_II.zero_grad()
+            self.optim_III.zero_grad()
 
             # logging
             print(
@@ -267,6 +309,8 @@ class Solver(object):
                 f"loss_percept={percept_loss.item():.6f}",
                 f"loss_integ={integ_loss.item():6f}",
                 f"loss_discr={discr_loss.item():6f}",
+                f"loss_ident={ident_loss.item():6f}",
+                f"SNR={snr:4f}",
                 f"acc_msg={acc_msg:4f}",
                 f"acc_lcode={acc_lcode:4f}",
                 end="\r",

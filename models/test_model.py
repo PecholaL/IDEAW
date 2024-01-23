@@ -22,12 +22,12 @@ print(f"batch data shape: {data.shape}")
 
 # embedding&extracting process test
 ## shape check
-audio = torch.FloatTensor(data[0].float().unsqueeze(0)).to("cpu")
+audio = torch.FloatTensor(data[0].float().unsqueeze(0)).to("cuda")
 audio_stft = IDEAW.stft(audio)
 msg = [1, 1, 1, 1, -1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1]  # 16bit
 lcode = [1, 1, 0, 0, 0, 1, 1, 1, 0, 0]  # 10bit
-msg = torch.FloatTensor(torch.tensor(msg).float().unsqueeze(0)).to("cpu")
-lcode = torch.FloatTensor(torch.tensor(lcode).float().unsqueeze(0)).to("cpu")
+msg = torch.FloatTensor(torch.tensor(msg).float().unsqueeze(0)).to("cuda")
+lcode = torch.FloatTensor(torch.tensor(lcode).float().unsqueeze(0)).to("cuda")
 print(f"audio shape: {audio.shape}")
 print(f"stft audio shape (B, F, T, C): {audio_stft.shape}")
 print(f"msg&lcode shape: {msg.shape}&{lcode.shape}")

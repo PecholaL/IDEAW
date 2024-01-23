@@ -1,15 +1,15 @@
 # IDEAW model configuration
 
 IDEAW:
-  num_inn_1: 12
-  num_inn_2: 6
+  num_inn_1: 4
+  num_inn_2: 16
   ## for STFT and ISTFT
   n_fft: 1000
   hop_len: 250
   win_len: 1000
   ## for expanding watermark message
-  num_bit: 16
-  num_lc_bit: 10
+  num_bit: 10
+  num_lc_bit: 36
   num_point: 16000
   chunk_ratio: 4
   ## locating step size

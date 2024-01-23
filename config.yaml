@@ -3,7 +3,7 @@ train:
   batch_size: 8
   num_workers: 0
   lambda_integ: 10
-  lambda_percpet: 1
+  lambda_percept: 1
   lambda_ident: 1
   lr1: 1e-5
   lr2: 1e-5

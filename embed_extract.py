@@ -31,7 +31,7 @@ audio_path = "/Users/pecholalee/Coding/Watermark/miniAWdata/p225_008.wav"
 output_path = "/Users/pecholalee/Coding/Watermark/ideaw_data/output/wmd_audio.wav"
 
 # device
-device = "cpu"
+device = "cuda"
 
 if __name__ == "__main__":
     # build model and load trained parameters
