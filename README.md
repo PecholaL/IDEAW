@@ -50,4 +50,4 @@ Bibtex: `coming soon`
 
 or with a [hyperlink](https://github.com/PecholaL/IDEAW),  
 Markdown: `[IDEAW](https://github.com/PecholaL/IDEAW)`  
-Latex: `\hyperlink{https://github.com/PecholaL/IDEAW}{IDEAW}`
+Latex: `\hyperref{https://github.com/PecholaL/IDEAW}{IDEAW}`
