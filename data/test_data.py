@@ -5,10 +5,10 @@ import pickle
 import yaml
 from random import randint
 from scipy.io.wavfile import write
-from data.utils import *
-from data.dataset import AWdataset, get_data_loader, infinite_iter
+from utils import *
+from dataset import AWdataset, get_data_loader, infinite_iter
 
-pickle_path = "../../Watermark/miniAWdata_pickle/stft.pkl"
+pickle_path = "../Watermark/miniAWdata_pickle/audio.pkl"
 
 # Load pickle dataset
 with open(pickle_path, "rb") as f:
@@ -16,7 +16,7 @@ with open(pickle_path, "rb") as f:
     print(f"[test]load {len(data)} data items")
 
 # Load data processing configure
-with open("../data/config.yaml") as f:
+with open("./data/config.yaml") as f:
     config = yaml.load(f, Loader=yaml.FullLoader)
 
 sample_rate = config["sample_rate"]

@@ -8,7 +8,7 @@ import pickle
 import random
 import yaml
 
-from data.utils import *
+from utils import *
 
 
 if __name__ == "__main__":
