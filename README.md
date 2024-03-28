@@ -1,8 +1,9 @@
 # IDEAW
 Robust Neural Audio Watermarking with Invertible Dual-Embedding
 
-![Static Badge](https://img.shields.io/badge/LICENSE-Apache%202.0)
-
+![https://img.shields.io/badge/LICENSE-Apache_2.0-red?style=flat](https://github.com/PecholaL/IDEAW/blob/main/LICENSE)
+![https://img.shields.io/badge/AI-security-pink?style=flat](https://github.com/PecholaL/IDEAW)
+![https://img.shields.io/badge/Pechola_L-blue?style=flat](https://github.com/PecholaL)
 
 **☕️☕️☕️**
 ## Abstract
