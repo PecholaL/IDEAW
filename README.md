@@ -4,7 +4,7 @@
 [![](https://img.shields.io/badge/Pechola_L-blue?style=flat)](https://github.com/PecholaL)  
 
 Robust Neural Audio Watermarking with Invertible Dual-Embedding  
-[IDEAW home page](https://pecholal.github.io/IDEAW-demo/)
+<!-- [IDEAW home page](https://pecholal.github.io/IDEAW-demo/) -->
 
 ## Abstract
 Audio watermarking embeds messages into audio and accurately extracts the watermark even after the watermarked audio has been damaged. Compared to traditional digital watermarking algorithms, neural watermarking using neural networks has better robustness for various attacks are considered during training. However, neural watermarking methods suffer to low capacity and undesirable imperceptibility. In addition, in practical scenarios, watermarks are redundantly embedded in audio according to the demand, and the audio is also subjected to cropping and splicing, which makes the efficient locating of watermarks a problem worth exploring. We design an invertible neural network to realize a dual-embedding watermarking model for efficient locating, at the same time, we consider the impact of the attack layer on the invertible neural network in robustness training and improve the model so as to enhance the reasonableness and stability.

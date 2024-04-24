@@ -28,12 +28,12 @@ msg_bit = 48
 lcode_bit = 10
 
 # config paths
-config_model_path = "/Users/pecholalee/Coding/IDEAW/models/config.yaml"
-ckpt_path = "/Users/pecholalee/Coding/Watermark/ideaw_data/save/stage_I/ideaw.ckpt"
+config_model_path = "/path/to/config/yaml"
+ckpt_path = "/path/to/ideaw/ckpt"
 
 # audio path
-audio_path = "/Users/pecholalee/Coding/Watermark/miniAWdata/p225_008.wav"
-output_path = "/Users/pecholalee/Coding/Watermark/ideaw_data/output/wmd_audio.wav"
+audio_path = "/path/to/wav"
+output_path = "/path/to/wav"
 
 # device
 device = "cuda"
