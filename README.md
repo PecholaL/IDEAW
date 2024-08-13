@@ -48,6 +48,9 @@ The code provides 8 types of common attacks on audio, including Gaussian additiv
 Remember to modify the configuration if more attacks are included:  
 *./models/config.yaml*["AttackLayer"]["att_num"].
 
+## Attention
+Due to the company's security regulations, the final version of the experimental code is debugged and run on company's server but cannot be copied out. There may be some errors in the current version. If you find any mistakes, please point them out through issue, thanks.
+
 ## Citation
 If **IDEAW** helps your research, please cite it as,  
 Bibtex: `coming soon`  
