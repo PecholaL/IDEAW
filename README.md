@@ -53,7 +53,17 @@ Due to the company's security regulations, the final version of the experimental
 
 ## Citation
 If **IDEAW** helps your research, please cite it as,  
-Bibtex: `coming soon`  
+Bibtex:  
+```
+@inproceedings{li2024ideaw,
+  title={IDEAW: Robust Neural Audio Watermarking with Invertible Dual-Embedding},
+  author={Li, Pengcheng and Zhang, Xulong and Xiao, Jing and Wang, Jianzong},
+  booktitle={Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing},
+  pages={1--7},
+  year={2024},
+  publisher={Association for Computational Linguistics}
+}
+``` 
 
 or with a [hyperlink](https://github.com/PecholaL/IDEAW),  
 Markdown: `[IDEAW](https://github.com/PecholaL/IDEAW)`  
