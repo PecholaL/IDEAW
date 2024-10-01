@@ -1,5 +1,6 @@
 # IDEAW
 [![](https://img.shields.io/badge/LICENSE-Apache_2.0-yellow?style=flat)](https://github.com/PecholaL/IDEAW/blob/main/LICENSE) 
+[![](https://img.shields.io/badge/EMNLP-2024-green?style=flat)](https://2024.emnlp.org) 
 [![](https://img.shields.io/badge/AI-security-pink?style=flat)](https://github.com/PecholaL/IDEAW) 
 [![](https://img.shields.io/badge/Pechola_L-blue?style=flat)](https://github.com/PecholaL)  
 
