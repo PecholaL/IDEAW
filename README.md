@@ -59,7 +59,7 @@ Bibtex:
   title={IDEAW: Robust Neural Audio Watermarking with Invertible Dual-Embedding},
   author={Li, Pengcheng and Zhang, Xulong and Xiao, Jing and Wang, Jianzong},
   booktitle={Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing},
-  pages={1--7},
+  pages={1--12},
   year={2024},
   publisher={Association for Computational Linguistics}
 }
