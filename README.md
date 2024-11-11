@@ -58,12 +58,15 @@ If **IDEAW** helps your research, please cite it as,
 Bibtex:  
 ```
 @inproceedings{li2024ideaw,
-  title={IDEAW: Robust Neural Audio Watermarking with Invertible Dual-Embedding},
-  author={Li, Pengcheng and Zhang, Xulong and Xiao, Jing and Wang, Jianzong},
-  booktitle={Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing},
-  pages={1--12},
-  year={2024},
-  publisher={Association for Computational Linguistics}
+   title = "{IDEAW}: Robust Neural Audio Watermarking with Invertible Dual-Embedding",
+   author = "Li, Pengcheng  and Zhang, Xulong  and Xiao, Jing  and Wang, Jianzong",
+   booktitle = "Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing",
+   month = nov,
+   year = "2024",
+   address = "Miami, Florida, USA",
+   publisher = "Association for Computational Linguistics",
+   url = "https://aclanthology.org/2024.emnlp-main.258",
+   pages = "4500--4511",
 }
 ``` 
 
