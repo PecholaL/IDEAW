@@ -59,7 +59,7 @@ Bibtex:
 ```
 @inproceedings{li2024ideaw,
    title = "{IDEAW}: Robust Neural Audio Watermarking with Invertible Dual-Embedding",
-   author = "Li, Pengcheng  and Zhang, Xulong  and Xiao, Jing  and Wang, Jianzong",
+   author = "Li, Pengcheng and Zhang, Xulong  and Xiao, Jing  and Wang, Jianzong",
    booktitle = "Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing",
    month = nov,
    year = "2024",
