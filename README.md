@@ -66,7 +66,7 @@ Bibtex:
    address = "Miami, Florida, USA",
    publisher = "Association for Computational Linguistics",
    url = "https://aclanthology.org/2024.emnlp-main.258",
-   pages = "4500--4511",
+   pages = "4500--4511"
 }
 ``` 
 
